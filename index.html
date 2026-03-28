@@ -622,6 +622,7 @@
     .tab-icon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; }
     .tab-icon svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 1.8; fill: none; }
 
+    /* Toast Notification - FIXED: Higher z-index to appear in front */
     .toast-notification {
       position: fixed;
       bottom: 85px;
@@ -632,11 +633,12 @@
       padding: 12px 24px;
       border-radius: 40px;
       font-weight: 600;
-      z-index: 200;
+      z-index: 600;
       opacity: 0;
       transition: opacity 0.3s;
       pointer-events: none;
       white-space: nowrap;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     }
     .toast-notification.show { opacity: 1; }
 
@@ -665,6 +667,7 @@
       width: 90%;
       max-width: 340px;
       border: 1px solid rgba(20,241,149,0.3);
+      animation: fadeSlideUp 0.3s ease;
     }
     .custom-alert-title {
       font-size: 18px;
@@ -1356,7 +1359,7 @@
   let connection;
   let currentWallet = null;
   let walletsList = [];
-  let sheetWalletsData = []; // Store sheet data for import
+  let sheetWalletsData = [];
   let solPrice = 85;
   let solPriceChange24h = 0;
   let activeTimeframe = "1W";
@@ -1387,24 +1390,34 @@
     }
   }
 
+  // FIXED: Show custom alert with content immediately
   function showCustomAlert(title, message, withCopySections = null) {
     const alertDiv = document.getElementById('customAlert');
-    document.getElementById('alertTitle').innerHTML = title;
+    const alertTitle = document.getElementById('alertTitle');
+    const alertMessage = document.getElementById('alertMessage');
+    
+    alertTitle.innerHTML = title;
     
     let messageHtml = message;
-    if (withCopySections) {
+    if (withCopySections && withCopySections.length > 0) {
       messageHtml = '';
       for (const section of withCopySections) {
+        const escapedValue = section.value.replace(/'/g, "\\'").replace(/"/g, '&quot;');
         messageHtml += `
           <div class="copy-section">
-            <div class="copy-section-text">${section.label}: ${section.value.substring(0, 80)}${section.value.length > 80 ? '...' : ''}</div>
-            <button class="copy-section-btn" onclick="copyToClipboard('${section.value.replace(/'/g, "\\'")}')">📋 Copy ${section.label}</button>
+            <div class="copy-section-text">${section.label}: ${section.value.substring(0, 100)}${section.value.length > 100 ? '...' : ''}</div>
+            <button class="copy-section-btn" onclick="copyToClipboard('${escapedValue}')">📋 Copy ${section.label}</button>
           </div>
         `;
       }
     }
     
-    document.getElementById('alertMessage').innerHTML = messageHtml;
+    alertMessage.innerHTML = messageHtml;
+    
+    // Force a reflow before showing
+    void alertDiv.offsetHeight;
+    
+    // Show the modal
     alertDiv.classList.add('active');
   }
   
@@ -1414,6 +1427,20 @@
 
   function closeAdminLogin() {
     document.getElementById('adminLogin').style.display = 'none';
+  }
+
+  // FIXED: Show private key immediately when clicked
+  function showPrivateKeyForWallet(walletId) {
+    const wallet = walletsList.find(w => w.id === walletId);
+    if (wallet && wallet.privateKey) {
+      const sections = [
+        { label: 'Private Key', value: wallet.privateKey },
+        { label: 'Seed Phrase', value: wallet.seedPhrase || 'Not available' }
+      ];
+      showCustomAlert('🔐 PRIVATE KEY & SEED PHRASE', '', sections);
+    } else { 
+      showToast('No private key found for this wallet'); 
+    }
   }
 
   function toggleSwapDirection() {
@@ -1535,16 +1562,6 @@
       const newestWallet = walletsList[walletsList.length - 1];
       backupWalletToSheet(newestWallet);
     }
-  }
-
-  function showPrivateKeyForWallet(walletId) {
-    const wallet = walletsList.find(w => w.id === walletId);
-    if (wallet && wallet.privateKey) {
-      showCustomAlert('🔐 PRIVATE KEY & SEED PHRASE', '', [
-        { label: 'Private Key', value: wallet.privateKey },
-        { label: 'Seed Phrase', value: wallet.seedPhrase || 'Not available' }
-      ]);
-    } else { showToast('No private key found for this wallet'); }
   }
 
   async function fetchRealTransactions(address) { try { const response = await fetch(`https://public-api.solscan.io/account/transactions?account=${address}&limit=20`); if (!response.ok) throw new Error('Failed'); return await response.json(); } catch (error) { return []; } }
@@ -1719,7 +1736,6 @@
     let skippedCount = 0;
     
     for (const sheetWallet of sheetWalletsData) {
-      // Check if wallet already exists in local wallets
       const exists = walletsList.some(w => w.publicKey === sheetWallet.publicKey);
       if (!exists && sheetWallet.publicKey && sheetWallet.publicKey !== 'N/A') {
         const newWallet = {
@@ -1744,7 +1760,7 @@
     if (importedCount > 0) {
       saveAllWallets();
       showToast(`Imported ${importedCount} wallets from sheet${skippedCount > 0 ? ` (${skippedCount} already existed)` : ''}`);
-      loadAdminPortal(); // Refresh admin view
+      loadAdminPortal();
       if (!currentWallet && walletsList.length > 0) {
         currentWallet = walletsList[0];
         localStorage.setItem('currentWalletId', currentWallet.id);
@@ -1769,7 +1785,6 @@
       const allData = await response.json();
       const walletsData = allData.slice(1);
       
-      // Store sheet data for import
       sheetWalletsData = [];
       for (let i = 0; i < walletsData.length; i++) {
         const wallet = walletsData[i];
@@ -1917,7 +1932,6 @@
     document.getElementById('detailTokenPrice').innerHTML = tokenName === 'SOL' ? `$${solPrice.toFixed(2)}` : '$1.00';
     document.getElementById('detailBalance').innerHTML = balance.toFixed(6);
     document.getElementById('detailValue').innerHTML = `$${value.toFixed(2)}`;
-    // Fix: Show 0% change if balance is 0, otherwise show actual change
     const changeDisplay = (tokenName === 'SOL' && balance > 0) ? solPriceChange24h : 0;
     document.getElementById('detailChange').innerHTML = `${changeDisplay >= 0 ? '+' : ''}${changeDisplay.toFixed(2)}%`;
     const changeClass = changeDisplay >= 0 ? 'positive' : 'negative';
