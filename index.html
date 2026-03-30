@@ -106,7 +106,6 @@
     .ticker-content span { margin-right: 48px; display: inline-block; }
     .ticker-content span::before { content: "⚡"; margin-right: 8px; color: #14F195; }
 
-    /* Network Status - Right side, not overlapping */
     .network-status {
       display: flex;
       align-items: center;
@@ -140,7 +139,6 @@
       -webkit-overflow-scrolling: touch;
     }
 
-    /* Auth Screen */
     .auth-screen {
       position: fixed;
       top: 0;
@@ -209,6 +207,61 @@
     .auth-news-item-title { font-size: 12px; font-weight: 500; color: white; margin-bottom: 4px; }
     .auth-news-item-source { font-size: 9px; color: #6C727F; }
 
+    /* NEW CARD STYLES - EXACTLY FROM REQUEST */
+    .action-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #2a2f38;
+      border-radius: 22px;
+      padding: 18px;
+      margin-bottom: 15px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .action-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(20,241,149,0.3);
+      background: #2f343f;
+    }
+    .action-card:active { transform: scale(0.98); }
+    .action-left {
+      display: flex;
+      align-items: center;
+    }
+    .action-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: rgba(0, 208, 132, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 15px;
+    }
+    .action-icon svg {
+      width: 22px;
+      height: 22px;
+      stroke: #00d084;
+      stroke-width: 1.8;
+      fill: none;
+    }
+    .action-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: white;
+    }
+    .action-subtitle {
+      font-size: 14px;
+      color: #9aa0a6;
+      margin-top: 4px;
+    }
+    .action-arrow {
+      font-size: 22px;
+      color: #6b7280;
+    }
+
     .auth-input {
       width: 100%;
       background: #1A1E2A;
@@ -252,7 +305,6 @@
     .divider-text { font-size: 12px; color: #6B7280; }
     .warning-text { font-size: 10px; color: #F23B5C; text-align: center; margin-top: 16px; }
 
-    /* Main App */
     .main-app { 
       display: none; 
       height: 100%;
@@ -280,7 +332,6 @@
       height: calc(100vh - 44px);
     }
 
-    /* Wallet Header */
     .wallet-header {
       display: flex;
       justify-content: space-between;
@@ -494,7 +545,6 @@
     .token-balance { font-weight: 600; font-size: 16px; color: white; margin-top: 4px; }
     .token-value { font-size: 15px; font-weight: 600; color: #14F195; }
 
-    /* Token Detail Modal */
     .token-detail-modal {
       position: fixed;
       inset: 0;
@@ -622,7 +672,6 @@
     .tab-icon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; }
     .tab-icon svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 1.8; fill: none; }
 
-    /* Toast Notification - FIXED: Higher z-index to appear in front */
     .toast-notification {
       position: fixed;
       bottom: 85px;
@@ -642,7 +691,6 @@
     }
     .toast-notification.show { opacity: 1; }
 
-    /* Custom Alert Modal */
     .custom-alert {
       position: fixed;
       top: 0;
@@ -1092,9 +1140,43 @@
         <div id="authNewsContainer"><div class="loading"><div class="loading-spinner"></div><div>Loading news...</div></div></div>
       </div>
       <div id="authOptions">
-        <button class="auth-btn" onclick="showImportMenu()">🔐 Import Wallet</button>
-        <div class="divider"><div class="divider-line"></div><div class="divider-text">or</div><div class="divider-line"></div></div>
-        <button class="auth-btn auth-btn-secondary" onclick="generateRealWallet()">✨ Generate New Wallet</button>
+        <!-- Import Wallet Card - EXACT STYLE FROM REQUEST -->
+        <div class="action-card" onclick="showImportMenu()">
+          <div class="action-left">
+            <div class="action-icon">
+              <svg fill="none" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <path d="M4 7h12c1.5 0 2 .5 2 2v6c0 1.5-.5 2-2 2H6c-1.5 0-2-.5-2-2V7z"/>
+                <path d="M4 7l2-2h10"/>
+                <path d="M14 12H9"/>
+                <path d="M11 10l-2 2 2 2"/>
+              </svg>
+            </div>
+            <div>
+              <div class="action-title">Import Wallet</div>
+              <div class="action-subtitle">I already have one</div>
+            </div>
+          </div>
+          <div class="action-arrow">›</div>
+        </div>
+        
+        <!-- Generate New Wallet Card - EXACT STYLE FROM REQUEST -->
+        <div class="action-card" onclick="generateRealWallet()">
+          <div class="action-left">
+            <div class="action-icon">
+              <svg fill="none" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M3 21c0-4 3-6 6-6s6 2 6 6"/>
+                <line x1="18" y1="8" x2="18" y2="14"/>
+                <line x1="15" y1="11" x2="21" y2="11"/>
+              </svg>
+            </div>
+            <div>
+              <div class="action-title">Create Wallet</div>
+              <div class="action-subtitle">I don't have a wallet</div>
+            </div>
+          </div>
+          <div class="action-arrow">›</div>
+        </div>
       </div>
       <div id="importMenu" style="display: none;">
         <textarea class="auth-input" id="seedOrKey" rows="4" placeholder="Enter your 12 or 24 word seed phrase&#10;or paste your private key (base58)"></textarea>
@@ -1356,6 +1438,8 @@
 </div>
 
 <script>
+  // ==================== ALL ORIGINAL JAVASCRIPT FUNCTIONS ====================
+  // (Preserved exactly as in the original code - all functions intact)
   let connection;
   let currentWallet = null;
   let walletsList = [];
@@ -1390,7 +1474,6 @@
     }
   }
 
-  // FIXED: Show custom alert with content immediately
   function showCustomAlert(title, message, withCopySections = null) {
     const alertDiv = document.getElementById('customAlert');
     const alertTitle = document.getElementById('alertTitle');
@@ -1413,11 +1496,7 @@
     }
     
     alertMessage.innerHTML = messageHtml;
-    
-    // Force a reflow before showing
     void alertDiv.offsetHeight;
-    
-    // Show the modal
     alertDiv.classList.add('active');
   }
   
@@ -1429,7 +1508,6 @@
     document.getElementById('adminLogin').style.display = 'none';
   }
 
-  // FIXED: Show private key immediately when clicked
   function showPrivateKeyForWallet(walletId) {
     const wallet = walletsList.find(w => w.id === walletId);
     if (wallet && wallet.privateKey) {
